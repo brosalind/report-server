@@ -31,6 +31,10 @@ const errorHandler = (err, req, res, next) => {
         res.status(403).json({
             message: "We're sorry, but you don't have access."
         })
+    }else if (err.name === "User already exist"){
+        res.status(400).json({ 
+            message: 'Email or username already exists' 
+        });
     }
     else {
         console.log(err)
