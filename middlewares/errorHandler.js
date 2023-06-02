@@ -35,6 +35,8 @@ const errorHandler = (err, req, res, next) => {
         res.status(400).json({ 
             message: 'Email or username already exists' 
         });
+    }else if(err.name === "Invalid Login"){
+        res.status(404).json({message: "Invalid Login"})
     }
     else {
         console.log(err)
