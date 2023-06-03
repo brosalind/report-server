@@ -1,13 +1,11 @@
 const jwt = require('jsonwebtoken')
 const { verifyToken } = require('../helpers/jwt')
-const { User } = require('../models')
+const { User } = require('../models/User')
 
 const authentication = async (req, res, next) => {
     try {
     const { access_token } = req.headers
-
-    console.log(access_token)
-
+    
     if(!access_token){
         throw {name: 'Unauthorized'}
     } else{
@@ -27,4 +25,4 @@ const authentication = async (req, res, next) => {
     }
 }
 
-module.exports = authentication
+module.exports = {authentication}
