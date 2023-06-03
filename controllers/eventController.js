@@ -45,16 +45,35 @@ class eventController {
         }
     }
 
-    static async joinEvent(req, res, next){
+    static async joinEvent(req, res, next) {
         try {
-            const {eventId} = req.params.eventId 
+            const { eventId } = req.params.eventId
 
-            const newParticipant = req.user 
+            const newParticipant = req.user
 
 
-        }catch(err){
+        } catch (err) {
             next(err)
         }
+    }
+
+    static async cancelEvent(req, res, next) {
+        try {
+            const eventId = req.params.eventId
+            console.log(eventId)
+            const deletedEvent = await Event.findOneAndRemove({
+                _id: eventId
+            })
+
+            if (!deletedEvent) {
+                throw { name: "notFound" }
+            }
+            res.json({ message: `${deletedEvent.title} was cancelled.` })
+
+        } catch (err) {
+            next(err)
+        }
+
     }
 
 }
