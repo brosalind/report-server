@@ -93,15 +93,13 @@ class eventController {
         try {
             const myEventId = req.params.myEventId
 
-            const events = await Event.find({_id: myEventId}).populate('creator').populate('participants.user')
-
             const event = await Event.findByIdAndUpdate(
                 myEventId,
                 { $pull: {participants: {user: req.user}}},
                 {new: true}
             ).populate('creator').populate('participants.user')
 
-            res.json(event)
+            res.json({message: `You have successfully leave ${event.title}`})
         } catch(err){
             next(err)
         }
