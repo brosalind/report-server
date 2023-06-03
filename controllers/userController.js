@@ -6,7 +6,7 @@ const { OAuth2Client } = require('google-auth-library')
 class Controller {
     static async createUser(req, res, next){
         try {
-            const { name, username, email, password } = req.body
+            const { name, username, gender, email, password } = req.body
 
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -16,6 +16,7 @@ class Controller {
             const user = await User.create({
                 name,
                 username,
+                gender,
                 email,
                 password,
                 role: "user",

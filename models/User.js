@@ -43,6 +43,10 @@ const UserSchema = mongoose.Schema({
     rating: {
         type: Number,
         default: 0
+    },
+    gender: {
+        type: String,
+        required: [true, "Gender is required"]
     }
 })
 
