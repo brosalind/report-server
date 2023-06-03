@@ -1,6 +1,7 @@
 const User = require("../models/User")
 const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
+const { OAuth2Client } = require('google-auth-library')
 
 class Controller {
     static async createUser(req, res, next){
@@ -23,7 +24,14 @@ class Controller {
                 rating: 0
             })
 
-            res.status(201).json({ message: 'User created successfully', user });
+            const access_token = signToken(
+                {
+                    id: user._id,
+                    email: user.email,
+                }
+            )
+
+            res.status(201).json({ message: 'User created successfully', user, access_token });
         } catch (error) {
             console.error(error);
             next(error)
@@ -63,6 +71,10 @@ class Controller {
         } catch (err) {
             next(err)
         }
+    }
+
+    static async googleLogin(req, res, next){
+
     }
 }
 
