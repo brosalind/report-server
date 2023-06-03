@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { verifyToken } = require('../helpers/jwt')
-const { User } = require('../models/User')
+const User  = require('../models/User')
 
 const authentication = async (req, res, next) => {
     try {
@@ -9,9 +9,9 @@ const authentication = async (req, res, next) => {
     if(!access_token){
         throw {name: 'Unauthorized'}
     } else{
-        const decodeToken = verifyToken(access_token, process.env.SECRET_KEY)
+        const decodeToken = verifyToken(access_token)
 
-        const userDatabase = await User.findByPk(decodeToken.id)
+        const userDatabase = await User.findById(decodeToken.id)
 
         if(!userDatabase){
             throw {name: 'Unauthorized'}
