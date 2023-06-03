@@ -27,7 +27,7 @@ class eventController {
 
     static async getAllEvents(req, res, next) {
         try {
-            const allEvents = await Event.find().populate('creator')
+            const allEvents = await Event.find().populate('creator').populate('participants.user')
             res.status(200).json(allEvents)
         } catch (err) {
             next(err)
@@ -38,7 +38,7 @@ class eventController {
         try {
             const myEvents = await Event.find({
                 creator: req.user._id
-            }).populate('creator')
+            }).populate('creator').populate('participants.user')
             res.json(myEvents)
         } catch (err) {
             next(err)
@@ -47,10 +47,25 @@ class eventController {
 
     static async joinEvent(req, res, next) {
         try {
-            const { eventId } = req.params.eventId
+            const eventId = req.params.eventId
 
-            const newParticipant = req.user
+            const currentEvent = await Event.findById({
+                _id: eventId
+            })
 
+            if(!currentEvent){
+                throw {name: "notFound"}
+            }
+
+            currentEvent.participants.push({user: req.user._id})
+    
+            await currentEvent.save()
+
+            const updatedEvent = await Event.findById({
+                _id: eventId
+            }).populate('creator').populate('participants.user')
+
+            res.json(updatedEvent)
 
         } catch (err) {
             next(err)
@@ -60,7 +75,6 @@ class eventController {
     static async cancelEvent(req, res, next) {
         try {
             const eventId = req.params.eventId
-            console.log(eventId)
             const deletedEvent = await Event.findOneAndRemove({
                 _id: eventId
             })

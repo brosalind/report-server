@@ -6,7 +6,6 @@ const authorization = async (req, res, next) => {
         const foundEvent = await Event.findOne({
             _id: req.params.eventId
         })
-
         if(!foundEvent){
             throw {name: "notFound"}
         }
@@ -20,6 +19,4 @@ const authorization = async (req, res, next) => {
     }
 
 }
-
-
-module.exports = {authorization}
+module.exports = {authorization}                                                      

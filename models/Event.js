@@ -33,8 +33,13 @@ const EventSchema = mongoose.Schema({
         ref: "User"
     },
     participants: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"User"
+        },
+        attended: {
+            type: Boolean,
+            default: false}
     }]
 })
 
