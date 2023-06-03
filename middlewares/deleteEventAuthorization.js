@@ -1,6 +1,6 @@
 const Event = require('../models/Event')
 
-const authorization = async (req, res, next) => {
+const deleteEventAuthorization = async (req, res, next) => {
 
     try {
         const foundEvent = await Event.findOne({
@@ -19,4 +19,4 @@ const authorization = async (req, res, next) => {
     }
 
 }
-module.exports = {authorization}                                                      
+module.exports = {deleteEventAuthorization}                                                      

@@ -99,6 +99,10 @@ class eventController {
                 {new: true}
             ).populate('creator').populate('participants.user')
 
+            if (!event) {
+                throw { name: "notFound" }
+            }
+
             res.json({message: `You have successfully leave ${event.title}`})
         } catch(err){
             next(err)
