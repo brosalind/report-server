@@ -20,7 +20,7 @@ class eventController{
                 creator: new Object("6478754b9bcd503c8327a81b")
             })
 
-            res.status(201).json(newEvent)
+            res.status(201).json(newEvent, {message: 'Event added'})
             
         } catch (err) {
             next(err)

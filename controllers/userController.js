@@ -51,7 +51,7 @@ class Controller {
                             email: user.email,
                         }
                     )
-                    res.json(access_token)
+                    res.status(200).json(access_token)
                 }
             }
         } catch (err) {
