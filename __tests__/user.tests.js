@@ -167,8 +167,36 @@ describe('User API', () => {
                 .send(data)
 
 
-            expect(response.status).toBe(404)
+            expect(response.status).toBe(400)
             expect(response.body.message).toBe('Invalid Login')
+        })
+
+        test('Should return Please input your email', async () => {
+            const data = {
+                email: '',
+                password: '12345555555555'
+            }
+            const response = await request(app)
+                .post('/user/login')
+                .send(data)
+
+
+            expect(response.status).toBe(400)
+            expect(response.body.message).toBe('Please input your email.')
+        })
+
+        test('Should return Please input your email', async () => {
+            const data = {
+                email: 'fi@mail.com',
+                password: ''
+            }
+            const response = await request(app)
+                .post('/user/login')
+                .send(data)
+
+
+            expect(response.status).toBe(400)
+            expect(response.body.message).toBe('Please input your password.')
         })
     })
 })
