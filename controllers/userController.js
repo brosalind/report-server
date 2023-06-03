@@ -32,30 +32,35 @@ class Controller {
 
     static async userLogin(req, res, next) {
         try {
-            const {email} = req.body
-            const user = await User.findOne({ email })
+            const {email, password} = req.body
 
-            console.log(user)
+            if(!email){
+                throw { name: 'noEmail' }
+            }
+            if(!password){
+                throw { name: 'noPassword' }
+            }
 
-            if (!user) {
+            const findUser = await User.findOne({ email })
+
+            if (!findUser) {
                 throw { name: 'userDoesNotExist' }
             } else {
-                const isPasswordValid = bcrypt.compareSync(req.body.password, user.password)
+                const isPasswordValid = bcrypt.compareSync(req.body.password, findUser.password)
 
                 if (!isPasswordValid) {
                     throw { name: `Invalid Login` }
                 } else {
                     const access_token = signToken(
                         {
-                            id: user._id,
-                            email: user.email,
+                            id: findUser._id,
+                            email: findUser.email,
                         }
                     )
                     res.status(200).json(access_token)
                 }
             }
         } catch (err) {
-            console.log(err)
             next(err)
         }
     }

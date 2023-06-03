@@ -23,12 +23,7 @@ const authentication = async (req, res, next) => {
         }
     }
     } catch (err) {
-        console.log(err)
-        if(err.name === 'JsonWebTokenError'){
-            throw {name: 'JsonWebTokenError'}
-        }else{
-           next(err)
-        }
+        next(err)
     }
 }
 

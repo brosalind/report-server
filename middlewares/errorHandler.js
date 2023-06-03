@@ -15,10 +15,6 @@ const errorHandler = (err, req, res, next) => {
         res.status(400).json({
             message: "Invalid user. Please register first or make sure your login details are correct."
         })
-    } else if(err.name === 'wrongPassword'){
-        res.status(400).json({
-            message: "Incorrect password. Please try again."
-        })
     } else if(err.name === 'JsonWebTokenError'){
         res.status(401).json({
             message: "Please login first."
@@ -35,8 +31,8 @@ const errorHandler = (err, req, res, next) => {
         res.status(400).json({ 
             message: 'Email or username already exists' 
         });
-    }else if(err.name === "Invalid Login"){
-        res.status(404).json({message: "Invalid Login"})
+    }else if (err.name === "Invalid Login"){
+        res.status(400).json({message: "Invalid Login"})
     }
     else {
         console.log(err)
