@@ -7,4 +7,5 @@ eventRouter.post('/', eventController.addEvent)
 eventRouter.get('/myevents', eventController.getMyEvents)
 eventRouter.put('/:eventId', eventController.joinEvent)
 eventRouter.delete('/:eventId', authorization, eventController.cancelEvent)
+eventRouter.put('/:myEventId/leave', eventController.leaveEvent)
 module.exports = eventRouter

@@ -87,7 +87,24 @@ class eventController {
         } catch (err) {
             next(err)
         }
+    }
 
+    static async leaveEvent(req, res, next){
+        try {
+            const myEventId = req.params.myEventId
+
+            const events = await Event.find({_id: myEventId}).populate('creator').populate('participants.user')
+
+            const event = await Event.findByIdAndUpdate(
+                myEventId,
+                { $pull: {participants: {user: req.user}}},
+                {new: true}
+            ).populate('creator').populate('participants.user')
+
+            res.json(event)
+        } catch(err){
+            next(err)
+        }
     }
 
 }
