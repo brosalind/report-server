@@ -37,6 +37,10 @@ const errorHandler = (err, req, res, next) => {
         res.status(403).json({
             message: "We're sorry, but the event is already full."
         })
+    }else if(err.name ==='alreadyJoined'){
+        res.status(400).json({
+            message: "You already joined the event."
+        })
     }
     else {
         console.log(err)

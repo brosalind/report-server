@@ -92,13 +92,17 @@ class eventController {
                 _id: eventId
             })
 
+            const isUserAlreadyAParticipant = currentEvent.participants.find(user => user = req.user._id)
+            if(isUserAlreadyAParticipant){
+                throw {name: "alreadyJoined"}
+            }
+
             if (!currentEvent) {
                 throw { name: "notFound" }
             }
 
             if(currentEvent.totalParticipants === currentEvent.limitParticipants){
                 throw {name: "eventFull"}
-
             }
             currentEvent.participants.push({ user: req.user._id })
 
