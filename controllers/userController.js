@@ -74,7 +74,39 @@ class Controller {
     }
 
     static async googleLogin(req, res, next){
+        try {
+            const { googletoken } = req.headers
+            const clientId = process.env.CLIENT_ID
+            const client = new OAuth2Client(clientId);
+            const ticket = await client.verifyIdToken({
+                idToken: googletoken,
+                audience: clientId
+            });
+            const payload = ticket.getPayload();
+            const email = payload.email
 
+            const [user, created] = await User.findOrCreate({
+                where: { email },
+                defaults: {
+                    email: payload.email,
+                    password: "12345",
+                    role: 'Customer',
+                },
+                hooks: false
+            })
+            const access_token = signToken(
+                {
+                    id: user.id,
+                    email: user.email,
+                }
+            )
+            res.json({
+                access_token,
+            })
+
+        } catch (error) {
+            next(error)
+        }
     }
 }
 

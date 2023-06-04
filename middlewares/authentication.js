@@ -11,7 +11,7 @@ const authentication = async (req, res, next) => {
     if(!access_token){
         throw {name: 'Unauthorized'}
     } else{
-        const decodeToken = verifyToken(access_token, process.env.SECRET_KEY)
+        const decodeToken = verifyToken(access_token)
 
         const userDatabase = await User.findByPk(decodeToken.id)
 
