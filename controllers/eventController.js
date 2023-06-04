@@ -59,8 +59,6 @@ class eventController {
                 ]
             }).populate('creator').populate('participants.user')
 
-
-         
             const previousEvents = await Event.find({
                 $and: [
                     {
@@ -102,9 +100,24 @@ class eventController {
 
             await currentEvent.save()
 
+            let newTotalParticipants = currentEvent.totalParticipants + 1
+            let newExpectedPrice = `${formatPrice(currentEvent.courtPrice / newTotalParticipants)} - ${formatPrice(currentEvent.courtPrice)}`
+
+            const update = {
+                $set: {
+                    totalParticipants: newTotalParticipants,
+                    expectedPrice: newExpectedPrice
+                }
+            }
+            const updateEvent = await Event.findOneAndUpdate({
+                _id: eventId
+            }, update)
+
+
             const updatedEvent = await Event.findById({
                 _id: eventId
             }).populate('creator').populate('participants.user')
+            
 
             res.json(updatedEvent)
 
@@ -143,8 +156,21 @@ class eventController {
             if (!event) {
                 throw { name: "notFound" }
             }
+            
+            let newTotalParticipant = event.totalParticipants - 1
+            let newExpectedPrice = `${formatPrice(event.courtPrice / newTotalParticipant)} - ${formatPrice(event.courtPrice)}`
 
-            res.json({ message: `You have successfully leave ${event.title}` })
+            const update = {
+                $set: {
+                    totalParticipants: newTotalParticipant,
+                    expectedPrice: newExpectedPrice
+                }
+            }
+            const updateEvent = await Event.findOneAndUpdate({
+                _id: myEventId
+            }, update)
+
+            res.json({ message: `You have successfully leave ${updateEvent.title}` })
         } catch (err) {
             next(err)
         }
