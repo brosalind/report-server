@@ -28,7 +28,7 @@ class eventController {
     static async getAllEvents(req, res, next) {
         try {
             const allEvents = await Event.find()
-            // .populate('creator').populate('participants.user')
+            .populate('creator').populate('participants.user')
             res.status(200).json(allEvents)
         } catch (err) {
             next(err)
@@ -95,6 +95,10 @@ class eventController {
             const isUserAlreadyAParticipant = currentEvent.participants.find(user => user = req.user._id)
             if(isUserAlreadyAParticipant){
                 throw {name: "alreadyJoined"}
+            }
+
+            if(currentEvent.creator.equals(req.user._id)){
+                throw {name: "participantCreator"}
             }
 
             if (!currentEvent) {

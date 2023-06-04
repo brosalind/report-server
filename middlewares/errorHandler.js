@@ -41,6 +41,10 @@ const errorHandler = (err, req, res, next) => {
         res.status(400).json({
             message: "You already joined the event."
         })
+    }else if(err.name ==='participantCreator'){
+        res.status(400).json({
+            message: "You can't join an event you create."
+        })
     }
     else {
         console.log(err)
