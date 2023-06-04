@@ -96,6 +96,10 @@ class eventController {
                 throw { name: "notFound" }
             }
 
+            if(currentEvent.totalParticipants === currentEvent.limitParticipants){
+                throw {name: "eventFull"}
+
+            }
             currentEvent.participants.push({ user: req.user._id })
 
             await currentEvent.save()

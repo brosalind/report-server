@@ -33,6 +33,10 @@ const errorHandler = (err, req, res, next) => {
         });
     }else if (err.name === "Invalid Login"){
         res.status(400).json({message: "Invalid Login"})
+    }else if(err.name ==='eventFull'){
+        res.status(403).json({
+            message: "We're sorry, but the event is already full."
+        })
     }
     else {
         console.log(err)
