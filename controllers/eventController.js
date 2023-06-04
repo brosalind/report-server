@@ -27,7 +27,8 @@ class eventController {
 
     static async getAllEvents(req, res, next) {
         try {
-            const allEvents = await Event.find().populate('creator').populate('participants.user')
+            const allEvents = await Event.find()
+            // .populate('creator').populate('participants.user')
             res.status(200).json(allEvents)
         } catch (err) {
             next(err)
@@ -36,10 +37,50 @@ class eventController {
 
     static async getMyEvents(req, res, next) {
         try {
-            const myEvents = await Event.find({
-                creator: req.user._id
+            const upcomingEvents = await Event.find({
+                $and: [
+                    {
+                        $or: [
+                            { creator: req.user._id },
+                            { participants: {
+                                $elemMatch: {
+                                    user: req.user._id.toString()
+                                }
+                            }}
+                        ]
+
+                    },
+                    { 
+                        $or: [
+                            {status: 'Open'},
+                            {status: 'Ongoing'}
+                        ]
+                    }
+                ]
             }).populate('creator').populate('participants.user')
-            res.json(myEvents)
+
+
+         
+            const previousEvents = await Event.find({
+                $and: [
+                    {
+                        $or: [
+                            { creator: req.user._id },
+                            { participants: {
+                                $elemMatch: {
+                                    user: req.user._id.toString()
+                                }
+                            }}
+                        ]
+
+                    },
+                    { 
+                        status: "Closed"
+                    }
+                ]
+            }).populate('creator').populate('participants.user')
+
+            res.json({upcomingEvents: upcomingEvents, previousEvent: previousEvents})
         } catch (err) {
             next(err)
         }
@@ -53,12 +94,12 @@ class eventController {
                 _id: eventId
             })
 
-            if(!currentEvent){
-                throw {name: "notFound"}
+            if (!currentEvent) {
+                throw { name: "notFound" }
             }
 
-            currentEvent.participants.push({user: req.user._id})
-    
+            currentEvent.participants.push({ user: req.user._id })
+
             await currentEvent.save()
 
             const updatedEvent = await Event.findById({
@@ -89,22 +130,22 @@ class eventController {
         }
     }
 
-    static async leaveEvent(req, res, next){
+    static async leaveEvent(req, res, next) {
         try {
             const myEventId = req.params.myEventId
 
             const event = await Event.findByIdAndUpdate(
                 myEventId,
-                { $pull: {participants: {user: req.user}}},
-                {new: true}
+                { $pull: { participants: { user: req.user } } },
+                { new: true }
             ).populate('creator').populate('participants.user')
 
             if (!event) {
                 throw { name: "notFound" }
             }
 
-            res.json({message: `You have successfully leave ${event.title}`})
-        } catch(err){
+            res.json({ message: `You have successfully leave ${event.title}` })
+        } catch (err) {
             next(err)
         }
     }
