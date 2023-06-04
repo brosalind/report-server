@@ -84,6 +84,19 @@ class eventController {
         }
     }
 
+    static async getEventDetails(req, res, next){
+        try {
+            const eventId = req.params.eventId
+            const selectedEvent = await Event.findById({
+                _id: eventId
+            }).populate('creator').populate('participants.user')
+            res.json(selectedEvent)
+            
+        }catch(err){
+            next(err)
+        }
+    }
+
     static async joinEvent(req, res, next) {
         try {
             const eventId = req.params.eventId

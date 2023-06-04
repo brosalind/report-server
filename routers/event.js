@@ -8,6 +8,7 @@ const { leaveEventAuthorization } = require('../middlewares/leaveEventAuthorizat
 eventRouter.post('/', eventController.addEvent)
 eventRouter.get('/myevents', eventController.getMyEvents)
 eventRouter.put('/:eventId', eventController.joinEvent)
+eventRouter.get('/:eventId', eventController.getEventDetails)
 eventRouter.delete('/:eventId', deleteEventAuthorization, eventController.cancelEvent)
 eventRouter.put('/:myEventId/leave',leaveEventAuthorization, eventController.leaveEvent)
 module.exports = eventRouter
