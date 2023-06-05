@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1685774449667" clover="3.2.0">
-  <project timestamp="1685774449667" name="All files">
-    <metrics statements="119" coveredstatements="104" conditionals="34" coveredconditionals="27" methods="13" coveredmethods="5" elements="166" coveredelements="136" complexity="0" loc="119" ncloc="119" packages="6" files="11" classes="11"/>
+<coverage generated="1685776557464" clover="3.2.0">
+  <project timestamp="1685776557464" name="All files">
+    <metrics statements="121" coveredstatements="106" conditionals="34" coveredconditionals="27" methods="14" coveredmethods="5" elements="169" coveredelements="138" complexity="0" loc="121" ncloc="121" packages="6" files="11" classes="11"/>
     <package name="report-server">
       <metrics statements="10" coveredstatements="10" conditionals="2" coveredconditionals="2" methods="0" coveredmethods="0"/>
       <file name="app.js" path="/Users/andrewchang/Desktop/Phase 3/report-server/app.js">
@@ -19,7 +19,7 @@
       </file>
     </package>
     <package name="report-server.controllers">
-      <metrics statements="37" coveredstatements="31" conditionals="10" coveredconditionals="10" methods="3" coveredmethods="2"/>
+      <metrics statements="39" coveredstatements="33" conditionals="10" coveredconditionals="10" methods="4" coveredmethods="2"/>
       <file name="eventController.js" path="/Users/andrewchang/Desktop/Phase 3/report-server/controllers/eventController.js">
         <metrics statements="9" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
@@ -33,35 +33,37 @@
         <line num="33" count="1" type="stmt"/>
       </file>
       <file name="userController.js" path="/Users/andrewchang/Desktop/Phase 3/report-server/controllers/userController.js">
-        <metrics statements="28" coveredstatements="28" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
+        <metrics statements="30" coveredstatements="30" conditionals="10" coveredconditionals="10" methods="3" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
-        <line num="7" count="7" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
         <line num="8" count="7" type="stmt"/>
-        <line num="10" count="7" type="stmt"/>
-        <line num="11" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="15" count="6" type="stmt"/>
-        <line num="26" count="2" type="stmt"/>
-        <line num="28" count="5" type="stmt"/>
-        <line num="29" count="5" type="stmt"/>
-        <line num="34" count="5" type="stmt"/>
-        <line num="35" count="5" type="stmt"/>
-        <line num="37" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="40" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="41" count="1" type="stmt"/>
-        <line num="44" count="3" type="stmt"/>
-        <line num="46" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="47" count="1" type="stmt"/>
-        <line num="49" count="2" type="stmt"/>
-        <line num="51" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="52" count="1" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
+        <line num="9" count="7" type="stmt"/>
+        <line num="11" count="7" type="stmt"/>
+        <line num="12" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="16" count="6" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="34" count="2" type="stmt"/>
+        <line num="36" count="5" type="stmt"/>
+        <line num="37" count="5" type="stmt"/>
+        <line num="42" count="5" type="stmt"/>
+        <line num="43" count="5" type="stmt"/>
+        <line num="45" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="48" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="52" count="3" type="stmt"/>
+        <line num="54" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="55" count="1" type="stmt"/>
+        <line num="57" count="2" type="stmt"/>
+        <line num="59" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="60" count="1" type="stmt"/>
-        <line num="64" count="4" type="stmt"/>
-        <line num="69" count="1" type="stmt"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="72" count="4" type="stmt"/>
+        <line num="81" count="1" type="stmt"/>
       </file>
     </package>
     <package name="report-server.helpers">
@@ -77,7 +79,7 @@
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
-        <line num="5" count="1" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
         <line num="8" count="1" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
         <line num="12" count="1" type="stmt"/>
