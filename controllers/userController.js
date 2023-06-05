@@ -4,7 +4,7 @@ const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require('google-auth-library')
 
 class Controller {
-    static async createUser(req, res, next){
+    static async createUser(req, res, next) {
         try {
             const { name, username, email, password } = req.body
 
@@ -40,12 +40,12 @@ class Controller {
 
     static async userLogin(req, res, next) {
         try {
-            const {email, password} = req.body
+            const { email, password } = req.body
 
-            if(!email){
+            if (!email) {
                 throw { name: 'noEmail' }
             }
-            if(!password){
+            if (!password) {
                 throw { name: 'noPassword' }
             }
 
@@ -73,7 +73,8 @@ class Controller {
         }
     }
 
-    static async googleLogin(req, res, next){
+    static async googleLogin(req, res, next) {
+        console.log(req.headers, '<<<<');
         try {
             const { googletoken } = req.headers
             const clientId = process.env.CLIENT_ID
@@ -84,16 +85,21 @@ class Controller {
             });
             const payload = ticket.getPayload();
             const email = payload.email
+            const name = payload.name
+            // res.json({email, name})
 
-            const [user, created] = await User.findOrCreate({
-                where: { email },
-                defaults: {
-                    email: payload.email,
-                    password: "12345",
-                    role: 'Customer',
-                },
-                hooks: false
-            })
+            let user = await User.findOne({ email });
+
+            if (!user) {
+                user = await User.create({
+                    email,
+                    name,
+                    password: "12345"
+                });
+            }
+
+            console.log(user);
+
             const access_token = signToken(
                 {
                     id: user.id,
@@ -105,6 +111,7 @@ class Controller {
             })
 
         } catch (error) {
+            console.log(error)
             next(error)
         }
     }
