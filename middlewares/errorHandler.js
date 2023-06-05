@@ -45,6 +45,10 @@ const errorHandler = (err, req, res, next) => {
         res.status(400).json({
             message: "You can't join an event you create."
         })
+    }else if(err.name ==='alreadyClose'){
+        res.status(400).json({
+            message: "Event has finished already."
+        })
     }
     else {
         console.log(err)
