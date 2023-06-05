@@ -9,12 +9,17 @@ const socket = require('socket.io')
 const server = require('http').createServer(app)
 const io = require('socket.io')(server, {
   cors: {
-    origin: '*'
+    origin: '*',
+    methods: ["GET", "POST"]
   }
 }, {
   pingTimeout: 60000,
 }
 )
+
+const Discussion = require('./models/Discussion')
+const Message = require('./models/Message')
+const User = require('./models/User')
 
 app.use(cors())
 
@@ -34,6 +39,35 @@ mongoose.connect(process.env.DB_LINK).then(() => {
 
 io.on("connection", (socket) => {
   console.log("connected", socket.id)
+
+  socket.on("message-received", async (data) => {
+    try {
+      const doesDiscussionExist = await Discussion.find({ eventId: data.eventId })
+  
+        const findUser = await User.find({ email: data.userEmail })
+  
+        if (doesDiscussionExist.length > 1) {
+          const newMessage = await Message.create({
+            sender: findUser._id,
+            content: data.message,
+            discussion: doesDiscussionExist[0]._id
+          })
+        } else {
+          const newDiscussion = await Discussion.create({
+            eventId: data.eventId,
+            users: findUser._id
+          })
+          const newMessage = await Message.create({
+            sender: findUser._id,
+            content: data.message,
+            discussion: newDiscussion._id
+          })
+        }
+        socket.broadcast.emit("message-stored", data.message)
+      } catch (err) {
+        console.log(err)
+      }   
+  })
 
   socket.on('disconnect', () => {
     console.log("disconnected")
