@@ -66,7 +66,17 @@ class Controller {
                             email: findUser.email,
                         }
                     )
-                    res.status(200).json(access_token)
+                    res.status(200).json({
+                        name: findUser.name, 
+                        username: findUser.username, 
+                        gender: findUser.gender, 
+                        email: findUser.email, 
+                        role: findUser.role, 
+                        pic: findUser.pic, 
+                        score: findUser.score, 
+                        rating: findUser.rating,
+                        access_token: access_token
+                    })
                 }
             }
         } catch (err) {
