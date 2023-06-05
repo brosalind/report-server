@@ -201,6 +201,41 @@ class eventController {
         }
     }
 
+    static async closeEvent(req, res, next) {
+        try {
+            const eventId = req.params.eventId
+
+            const currentEvent = await Event.findById({
+                _id: eventId
+            })
+
+            if(currentEvent.status === 'Close'){
+                throw {name: "alreadyClose"}
+            }
+
+            const update = {
+                $set: {
+                    status: 'Close',
+                }
+            }
+            const updateEventStatus = await Event.findOneAndUpdate({
+                _id: eventId
+            }, update)
+
+
+            const updatedEvent = await Event.findById({
+                _id: eventId
+            }).populate('creator').populate('participants.user')
+            
+
+            res.json(updatedEvent)
+
+        } catch (err) {
+            next(err)
+        }
+    }
+
+
 }
 
 module.exports = eventController
