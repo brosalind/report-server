@@ -32,6 +32,10 @@ const EventSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
+    sport: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Sport"
+    },
     participants: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,

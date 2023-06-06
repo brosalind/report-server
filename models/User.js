@@ -45,9 +45,16 @@ const UserSchema = mongoose.Schema({
         default: 0
     },
     gender: {
-        type: String,
-        required: [true, "Gender is required"]
-    }
+        type: String
+    },
+    sport: [{
+        name: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"Sport"
+        },
+        level: {
+            type: String}
+    }]
 })
 
 UserSchema.plugin(uniqueValidator, {message: "Email is already in use. Please use another one or login with your current account."});

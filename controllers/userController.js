@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require('google-auth-library')
 require('dotenv').config({path:'../.env'})
+const Sport = require('../models/Sport')
 
 class Controller {
     static async createUser(req, res, next) {
@@ -98,10 +99,8 @@ class Controller {
             const payload = ticket.getPayload();
             const email = payload.email
             const name = payload.name
-            // res.json({email, name})
 
             let user = await User.findOne({ email });
-
             if (!user) {
                 user = await User.create({
                     email,
@@ -110,9 +109,6 @@ class Controller {
                     gender: 'male'
                 });
             }
-
-            console.log(user);
-
             const access_token = signToken(
                 {
                     id: user.id,
@@ -128,6 +124,7 @@ class Controller {
             next(error)
         }
     }
+
 
     static async getAllUser(req, res, next) {
         try {
@@ -154,6 +151,90 @@ class Controller {
             res.status(200).json(user);
         } catch (error) {
             next(error);
+
+    static async addUserSports(req, res, next){
+        try {
+            const currentUser = await User.findById(req.user._id)
+        
+            const {sportList} = req.body 
+
+            let result = []
+            const sports = await Promise.all(sportList.map(async (el) => {
+
+                let sport = await Sport.find({name: el.name})   
+                
+                let obj = {
+                    name: sport[0]._id,
+                    level: el.level
+                }
+                result.push(obj)
+                return result
+
+            }))
+
+            currentUser.sport = result
+
+            await currentUser.save()
+
+            const currentUserUpdate = await User.findById(req.user._id).populate('sport.name')
+
+            res.json({ currentUserUpdate})
+
+        } catch(err){
+            next(err)
+        }
+    }
+
+
+    static async editUserGenderProf(req, res, next){
+        try {
+
+            const {pic, gender} = req.body
+
+            if(!req.body.pic.length || !req.body.pic.trim().length){
+                pic = 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg'
+            }
+
+            const update = {
+                $set: {
+                    gender: gender,
+                    pic: pic
+                }
+            }
+            const user = await User.findOneAndUpdate({
+                _id: req.user._id
+            }, update)
+
+            res.json(user)
+
+        } catch(err){
+            next(err)
+        }
+
+    }
+
+
+    static async editUserProfile(req, res, next){
+        try {
+            const update = {
+                $set: {
+                    name: req.body.name,
+                    username: req. body.username,
+                    email: req.body.email, 
+                    gender: req.body.gender,
+                    sportList: req.body.sportList,
+                    pic: req.body.pic
+                }
+            }
+
+            const user = await User.findOneAndUpdate({
+                _id: req.user._id
+            }, update)
+
+            res.json(user)
+
+        } catch(err){
+            next(err)
         }
     }
 }
