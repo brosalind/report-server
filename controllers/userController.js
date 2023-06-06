@@ -119,9 +119,9 @@ class Controller {
                     email: user.email,
                 }
             )
-            res.json({
+            res.json(
                 access_token,
-            })
+            )
 
         } catch (error) {
             console.log(error)

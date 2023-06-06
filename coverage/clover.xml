@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1686026572520" clover="3.2.0">
-  <project timestamp="1686026572520" name="All files">
-    <metrics statements="349" coveredstatements="199" conditionals="82" coveredconditionals="35" methods="53" coveredmethods="15" elements="484" coveredelements="249" complexity="0" loc="349" ncloc="349" packages="6" files="19" classes="19"/>
+<coverage generated="1686038804679" clover="3.2.0">
+  <project timestamp="1686038804679" name="All files">
+    <metrics statements="349" coveredstatements="202" conditionals="82" coveredconditionals="35" methods="53" coveredmethods="16" elements="484" coveredelements="253" complexity="0" loc="349" ncloc="349" packages="6" files="19" classes="19"/>
     <package name="report-server">
       <metrics statements="33" coveredstatements="19" conditionals="6" coveredconditionals="2" methods="8" coveredmethods="0"/>
       <file name="app.js" path="/Users/andrewchang/Desktop/Phase 3/report-server/app.js">
@@ -42,9 +42,9 @@
       </file>
     </package>
     <package name="report-server.controllers">
-      <metrics statements="164" coveredstatements="59" conditionals="36" coveredconditionals="15" methods="32" coveredmethods="9"/>
+      <metrics statements="164" coveredstatements="62" conditionals="36" coveredconditionals="15" methods="32" coveredmethods="10"/>
       <file name="eventController.js" path="/Users/andrewchang/Desktop/Phase 3/report-server/controllers/eventController.js">
-        <metrics statements="84" coveredstatements="11" conditionals="18" coveredconditionals="2" methods="15" coveredmethods="3"/>
+        <metrics statements="84" coveredstatements="14" conditionals="18" coveredconditionals="2" methods="15" coveredmethods="4"/>
         <line num="1" count="2" type="stmt"/>
         <line num="2" count="2" type="stmt"/>
         <line num="6" count="2" type="stmt"/>
@@ -54,9 +54,9 @@
         <line num="22" count="1" type="stmt"/>
         <line num="23" count="1" type="stmt"/>
         <line num="25" count="1" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="31" count="0" type="stmt"/>
-        <line num="33" count="0" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
         <line num="35" count="0" type="stmt"/>
         <line num="40" count="0" type="stmt"/>
         <line num="41" count="0" type="stmt"/>
