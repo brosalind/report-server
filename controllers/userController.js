@@ -6,6 +6,7 @@ require('dotenv').config({path:'../.env'})
 const Sport = require('../models/Sport')
 
 class Controller {
+    
     static async createUser(req, res, next) {
         try {
             const { name, username, gender, email, password } = req.body
@@ -151,6 +152,8 @@ class Controller {
             res.status(200).json(user);
         } catch (error) {
             next(error);
+        }
+    }
 
     static async addUserSports(req, res, next){
         try {
