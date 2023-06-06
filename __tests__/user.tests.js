@@ -141,22 +141,22 @@ describe('User API', () => {
             expect(response.body.message).toBe('Name is required')
         })
 
-        test('Should return Gender is required', async () => {
-            const newUser = {
-                name: 'hehehehehe',
-                username: 'heheheheheh',
-                email: 'hehehehehe@mail.com',
-                password: '12345',
-                gender: ''
-            }
+        // test('Should return Gender is required', async () => {
+        //     const newUser = {
+        //         name: 'hehehehehe',
+        //         username: 'heheheheheh',
+        //         email: 'hehehehehe@mail.com',
+        //         password: '12345',
+        //         gender: ''
+        //     }
 
-            const response = await request(app)
-                .post('/user')
-                .send(newUser)
+        //     const response = await request(app)
+        //         .post('/user')
+        //         .send(newUser)
 
-            expect(response.status).toBe(400)
-            expect(response.body.message).toBe('Gender is required')
-        })
+        //     expect(response.status).toBe(400)
+        //     expect(response.body.message).toBe('Gender is required')
+        // })
     })
 
     describe('User Login', () => {

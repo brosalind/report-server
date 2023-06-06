@@ -27,14 +27,14 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(router)
 
-mongoose.connect(process.env.DB_LINK).then(() => {
-  console.log("connected to db")
-  server.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-  })
-}).catch((err) => {
-  console.log(err)
-})
+// mongoose.connect(process.env.DB_LINK).then(() => {
+//   console.log("connected to db")
+//   server.listen(port, () => {
+//     console.log(`Example app listening on port ${port}`)
+//   })
+// }).catch((err) => {
+//   console.log(err)
+// })
 
 
 io.on("connection", (socket) => {

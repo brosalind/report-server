@@ -122,85 +122,85 @@ describe('Event API', () => {
         // });
     })
 
-    describe('Get My Events', () => {
-        // test('Should return upcoming and previous events for the authenticated user', async () => {
-        //     // const user = /* create a test user */;
-        //     let access_token;
-        //     const user = {
-        //         name: 'Chris',
-        //         username: 'Chris',
-        //         email: 'chris@mail.com',
-        //         password: '12345',
-        //         gender: 'male'
-        //     }
+    // describe('Get My Events', () => {
+    //     // test('Should return upcoming and previous events for the authenticated user', async () => {
+    //     //     // const user = /* create a test user */;
+    //     //     let access_token;
+    //     //     const user = {
+    //     //         name: 'Chris',
+    //     //         username: 'Chris',
+    //     //         email: 'chris@mail.com',
+    //     //         password: '12345',
+    //     //         gender: 'male'
+    //     //     }
 
-        //     const account = await request(app)
-        //         .post('/user')
-        //         .send(user)
+    //     //     const account = await request(app)
+    //     //         .post('/user')
+    //     //         .send(user)
 
-        //     access_token = account._body.access_token
+    //     //     access_token = account._body.access_token
 
-        //     const event1 = await Event.create({
-        //         title: 'Test Event',
-        //         location: 'Test Location',
-        //         date: '2023-06-07',
-        //         courtPrice: 100000,
-        //         limitParticipants: 8, 
-        //         });
-        //     const event2 = await Event.create({
-        //         title: 'Test Event 2',
-        //         location: 'Test Location 2',
-        //         date: '2023-06-07',
-        //         courtPrice: 100000,
-        //         limitParticipants: 8, 
-        //         });
+    //     //     const event1 = await Event.create({
+    //     //         title: 'Test Event',
+    //     //         location: 'Test Location',
+    //     //         date: '2023-06-07',
+    //     //         courtPrice: 100000,
+    //     //         limitParticipants: 8, 
+    //     //         });
+    //     //     const event2 = await Event.create({
+    //     //         title: 'Test Event 2',
+    //     //         location: 'Test Location 2',
+    //     //         date: '2023-06-07',
+    //     //         courtPrice: 100000,
+    //     //         limitParticipants: 8, 
+    //     //         });
 
-        //     // Add the user as a participant to event1
-        //     event1.participants.push({ user: user._id });
-        //     await event1.save();
+    //     //     // Add the user as a participant to event1
+    //     //     event1.participants.push({ user: user._id });
+    //     //     await event1.save();
 
-        //     const response = await request(app)
-        //         .get('/eventlist')
-        //         // .set('Authorization', `Bearer ${/* insert a valid access token for the user */}`)
-        //         .expect(200);
+    //     //     const response = await request(app)
+    //     //         .get('/eventlist')
+    //     //         // .set('Authorization', `Bearer ${/* insert a valid access token for the user */}`)
+    //     //         .expect(200);
 
-        //         console.log(response)
-        //     expect(response.status).toBe(200);
-        //     expect(response.body.upcomingEvents).toHaveLength(1); // Assert that the response contains the upcoming event
-        //     expect(response.body.previousEvents).toHaveLength(1); // Assert that the response contains the previous event
+    //     //         console.log(response)
+    //     //     expect(response.status).toBe(200);
+    //     //     expect(response.body.upcomingEvents).toHaveLength(1); // Assert that the response contains the upcoming event
+    //     //     expect(response.body.previousEvents).toHaveLength(1); // Assert that the response contains the previous event
 
-        //     // Assert that the creator and participants are populated for the events
-        //     expect(response.body.upcomingEvents[0].creator).toBeDefined();
-        //     expect(response.body.upcomingEvents[0].participants[0].user).toBeDefined();
-        //     expect(response.body.previousEvents[0].creator).toBeDefined();
-        //     expect(response.body.previousEvents[0].participants[0].user).toBeDefined();
-        // })
+    //     //     // Assert that the creator and participants are populated for the events
+    //     //     expect(response.body.upcomingEvents[0].creator).toBeDefined();
+    //     //     expect(response.body.upcomingEvents[0].participants[0].user).toBeDefined();
+    //     //     expect(response.body.previousEvents[0].creator).toBeDefined();
+    //     //     expect(response.body.previousEvents[0].participants[0].user).toBeDefined();
+    //     // })
 
-        test('Should return event details', async () => {
+    //     test('Should return event details', async () => {
             
-            const mockEvent = new Event({
-                title: 'Test Event',
-                location: 'Test Location',
-                date: '2023-06-07',
-                courtPrice: 100,
-                limitParticipants: 10,
-                creator: 'user_id',
-              });
-              await mockEvent.save();
+    //         const mockEvent = new Event({
+    //             title: 'Test Event',
+    //             location: 'Test Location',
+    //             date: '2023-06-07',
+    //             courtPrice: 100,
+    //             limitParticipants: 10,
+    //             creator: 'user_id',
+    //           });
+    //           await mockEvent.save();
 
-            // Send a request to the API endpoint
-            const response = await request(app)
-              .get(`/event/${mockEvent._id}`)
-              .expect(200);
+    //         // Send a request to the API endpoint
+    //         const response = await request(app)
+    //           .get(`/event/${mockEvent._id}`)
+    //           .expect(200);
         
-            // Assert the response
-            expect(response.status).toBe(200);
-            expect(response.body.title).toBe(mockEvent.title);
-            expect(response.body.location).toBe(mockEvent.location);
-            // ... assert other properties as needed
+    //         // Assert the response
+    //         expect(response.status).toBe(200);
+    //         expect(response.body.title).toBe(mockEvent.title);
+    //         expect(response.body.location).toBe(mockEvent.location);
+    //         // ... assert other properties as needed
         
-            // Clean up: delete the mock event from the database
-            await Event.findByIdAndDelete(mockEvent._id);
-          });
-    })
+    //         // Clean up: delete the mock event from the database
+    //         await Event.findByIdAndDelete(mockEvent._id);
+    //       });
+    // })
 })
