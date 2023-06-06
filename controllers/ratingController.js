@@ -20,9 +20,9 @@ class ratingController {
             const newRating = totalRating / ratingLength
 
             const ratedUser = await User.findOne({ _id: userId });
-            // if (!ratedUser) {
-            //     throw { name: 'notFound' }
-            // }
+            if (!ratedUser) {
+                throw { name: 'notFound' }
+            }
 
             ratedUser.rating = newRating;
             await ratedUser.save();
