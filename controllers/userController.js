@@ -2,6 +2,7 @@ const User = require("../models/User")
 const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require('google-auth-library')
+const Sport = require('../models/Sport')
 
 class Controller {
     static async createUser(req, res, next) {
@@ -85,7 +86,6 @@ class Controller {
     }
 
     static async googleLogin(req, res, next) {
-        console.log(req.headers, '<<<<');
         try {
             const { googletoken } = req.headers
             const clientId = process.env.CLIENT_ID
@@ -97,10 +97,8 @@ class Controller {
             const payload = ticket.getPayload();
             const email = payload.email
             const name = payload.name
-            // res.json({email, name})
 
             let user = await User.findOne({ email });
-
             if (!user) {
                 user = await User.create({
                     email,
@@ -108,9 +106,6 @@ class Controller {
                     password: "12345"
                 });
             }
-
-            console.log(user);
-
             const access_token = signToken(
                 {
                     id: user.id,
@@ -124,6 +119,39 @@ class Controller {
         } catch (error) {
             console.log(error)
             next(error)
+        }
+    }
+
+    static async addUserSports(req, res, next){
+        try {
+            const currentUser = await User.findById(req.user._id)
+        
+            const {sportList} = req.body 
+
+            let result = []
+            const sports = await Promise.all(sportList.map(async (el) => {
+
+                let sport = await Sport.find({name: el.name})   
+                
+                let obj = {
+                    name: sport[0]._id,
+                    level: el.level
+                }
+                result.push(obj)
+                return result
+
+            }))
+
+            currentUser.sport = result
+
+            await currentUser.save()
+
+            const currentUserUpdate = await User.findById(req.user._id).populate('sport.name')
+
+            res.json({ currentUserUpdate})
+
+        } catch(err){
+            next(err)
         }
     }
 }
