@@ -1,25 +1,52 @@
 const Event = require('../models/Event')
 const { formatPrice } = require('../helpers/formatPrice')
+const Sport = require('../models/Sport')
 
 class eventController {
     static async addEvent(req, res, next) {
         try {
-            const { title, location, date, courtPrice, limitParticipants } = req.body
+            const { title, location, date, courtPrice, limitParticipants, sport } = req.body
 
             let expectedPrice = `${formatPrice(courtPrice / limitParticipants)} - ${formatPrice(courtPrice)}`
 
-            const newEvent = await Event.create({
-                title: title,
-                location: location,
-                date: date,
-                courtPrice: courtPrice,
-                expectedPrice: expectedPrice,
-                limitParticipants: limitParticipants,
-                totalParticipants: 1,
-                status: 'Open',
-                creator: req.user._id
-            })
-            res.status(201).json(newEvent)
+            let sportInfo = await Sport.findOne({ name: sport })
+
+            if (!sportInfo) {
+                let newSport = await Sport.create({ name: sport })
+                let sportId = newSport._id
+
+                const newEvent = await Event.create({
+                    title: title,
+                    location: location,
+                    date: date,
+                    courtPrice: courtPrice,
+                    expectedPrice: expectedPrice,
+                    limitParticipants: limitParticipants,
+                    totalParticipants: 1,
+                    status: 'Open',
+                    creator: req.user._id,
+                    sport: sportId
+                })
+                res.status(201).json(newEvent)
+            } else {
+                let sportId = sportInfo._id
+                const newEvent = await Event.create({
+                    title: title,
+                    location: location,
+                    date: date,
+                    courtPrice: courtPrice,
+                    expectedPrice: expectedPrice,
+                    limitParticipants: limitParticipants,
+                    totalParticipants: 1,
+                    status: 'Open',
+                    creator: req.user._id,
+                    sport: sportId
+                })
+
+                res.status(201).json(newEvent)
+            }
+
+        
         } catch (err) {
             next(err)
         }
@@ -28,7 +55,7 @@ class eventController {
     static async getAllEvents(req, res, next) {
         try {
             const allEvents = await Event.find()
-            .populate('creator').populate('participants.user')
+                .populate('creator').populate('participants.user').populate('sport')
             res.status(200).json(allEvents)
         } catch (err) {
             next(err)
@@ -42,57 +69,61 @@ class eventController {
                     {
                         $or: [
                             { creator: req.user._id },
-                            { participants: {
-                                $elemMatch: {
-                                    user: req.user._id.toString()
+                            {
+                                participants: {
+                                    $elemMatch: {
+                                        user: req.user._id.toString()
+                                    }
                                 }
-                            }}
+                            }
                         ]
 
                     },
-                    { 
+                    {
                         $or: [
-                            {status: 'Open'},
-                            {status: 'Ongoing'}
+                            { status: 'Open' },
+                            { status: 'Ongoing' }
                         ]
                     }
                 ]
-            }).populate('creator').populate('participants.user')
+            }).populate('creator').populate('participants.user').populate('sport')
 
             const previousEvents = await Event.find({
                 $and: [
                     {
                         $or: [
                             { creator: req.user._id },
-                            { participants: {
-                                $elemMatch: {
-                                    user: req.user._id.toString()
+                            {
+                                participants: {
+                                    $elemMatch: {
+                                        user: req.user._id.toString()
+                                    }
                                 }
-                            }}
+                            }
                         ]
 
                     },
-                    { 
+                    {
                         status: "Closed"
                     }
                 ]
-            }).populate('creator').populate('participants.user')
+            }).populate('creator').populate('participants.user').populate('sport')
 
-            res.json({upcomingEvents: upcomingEvents, previousEvent: previousEvents})
+            res.json({ upcomingEvents: upcomingEvents, previousEvent: previousEvents })
         } catch (err) {
             next(err)
         }
     }
 
-    static async getEventDetails(req, res, next){
+    static async getEventDetails(req, res, next) {
         try {
             const eventId = req.params.eventId
             const selectedEvent = await Event.findById({
                 _id: eventId
-            }).populate('creator').populate('participants.user')
+            }).populate('creator').populate('participants.user').populate('sport')
             res.json(selectedEvent)
-            
-        }catch(err){
+
+        } catch (err) {
             next(err)
         }
     }
@@ -106,20 +137,20 @@ class eventController {
             })
 
             const isUserAlreadyAParticipant = currentEvent.participants.find(user => user = req.user._id)
-            if(isUserAlreadyAParticipant){
-                throw {name: "alreadyJoined"}
+            if (isUserAlreadyAParticipant) {
+                throw { name: "alreadyJoined" }
             }
 
-            if(currentEvent.creator.equals(req.user._id)){
-                throw {name: "participantCreator"}
+            if (currentEvent.creator.equals(req.user._id)) {
+                throw { name: "participantCreator" }
             }
 
             if (!currentEvent) {
                 throw { name: "notFound" }
             }
 
-            if(currentEvent.totalParticipants === currentEvent.limitParticipants){
-                throw {name: "eventFull"}
+            if (currentEvent.totalParticipants === currentEvent.limitParticipants) {
+                throw { name: "eventFull" }
             }
             currentEvent.participants.push({ user: req.user._id })
 
@@ -141,8 +172,8 @@ class eventController {
 
             const updatedEvent = await Event.findById({
                 _id: eventId
-            }).populate('creator').populate('participants.user')
-            
+            }).populate('creator').populate('participants.user').populate('sport')
+
 
             res.json(updatedEvent)
 
@@ -176,12 +207,12 @@ class eventController {
                 myEventId,
                 { $pull: { participants: { user: req.user } } },
                 { new: true }
-            ).populate('creator').populate('participants.user')
+            ).populate('creator').populate('participants.user').populate('sport')
 
             if (!event) {
                 throw { name: "notFound" }
             }
-            
+
             let newTotalParticipant = event.totalParticipants - 1
             let newExpectedPrice = `${formatPrice(event.courtPrice / newTotalParticipant)} - ${formatPrice(event.courtPrice)}`
 
@@ -209,8 +240,8 @@ class eventController {
                 _id: eventId
             })
 
-            if(currentEvent.status === 'Close'){
-                throw {name: "alreadyClose"}
+            if (currentEvent.status === 'Close') {
+                throw { name: "alreadyClose" }
             }
 
             const update = {
@@ -225,8 +256,8 @@ class eventController {
 
             const updatedEvent = await Event.findById({
                 _id: eventId
-            }).populate('creator').populate('participants.user')
-            
+            }).populate('creator').populate('participants.user').populate('sport')
+
 
             res.json(updatedEvent)
 
@@ -243,8 +274,8 @@ class eventController {
                 _id: eventId
             })
 
-            if(currentEvent.status === 'Close'){
-                throw {name: "alreadyClose"}
+            if (currentEvent.status === 'Close') {
+                throw { name: "alreadyClose" }
             }
 
             const update = {
@@ -259,8 +290,8 @@ class eventController {
 
             const updatedEvent = await Event.findById({
                 _id: eventId
-            }).populate('creator').populate('participants.user')
-            
+            }).populate('creator').populate('participants.user').populate('sport')
+
 
             res.json(updatedEvent)
 
