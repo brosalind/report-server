@@ -20,6 +20,7 @@ class eventController {
                 creator: req.user._id
             })
             res.status(201).json(newEvent)
+            console.log(newEvent)
         } catch (err) {
             next(err)
         }
