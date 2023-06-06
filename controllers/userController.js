@@ -154,6 +154,59 @@ class Controller {
             next(err)
         }
     }
+
+
+    static async editUserGenderProf(req, res, next){
+        try {
+
+            const {pic, gender} = req.body
+
+            if(!req.body.pic.length || !req.body.pic.trim().length){
+                pic = 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg'
+            }
+
+            const update = {
+                $set: {
+                    gender: gender,
+                    pic: pic
+                }
+            }
+            const user = await User.findOneAndUpdate({
+                _id: req.user._id
+            }, update)
+
+            res.json(user)
+
+        } catch(err){
+            next(err)
+        }
+
+    }
+
+
+    static async editUserProfile(req, res, next){
+        try {
+            const update = {
+                $set: {
+                    name: req.body.name,
+                    username: req. body.username,
+                    email: req.body.email, 
+                    gender: req.body.gender,
+                    sportList: req.body.sportList,
+                    pic: req.body.pic
+                }
+            }
+
+            const user = await User.findOneAndUpdate({
+                _id: req.user._id
+            }, update)
+
+            res.json(user)
+
+        } catch(err){
+            next(err)
+        }
+    }
 }
 
 module.exports = Controller
