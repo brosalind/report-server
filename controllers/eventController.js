@@ -45,8 +45,6 @@ class eventController {
 
                 res.status(201).json(newEvent)
             }
-
-        
         } catch (err) {
             next(err)
         }

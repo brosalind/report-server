@@ -2,6 +2,7 @@ const User = require("../models/User")
 const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require('google-auth-library')
+require('dotenv').config({path:'../.env'})
 const Sport = require('../models/Sport')
 
 class Controller {
@@ -68,13 +69,13 @@ class Controller {
                         }
                     )
                     res.status(200).json({
-                        name: findUser.name, 
-                        username: findUser.username, 
-                        gender: findUser.gender, 
-                        email: findUser.email, 
-                        role: findUser.role, 
-                        pic: findUser.pic, 
-                        score: findUser.score, 
+                        name: findUser.name,
+                        username: findUser.username,
+                        gender: findUser.gender,
+                        email: findUser.email,
+                        role: findUser.role,
+                        pic: findUser.pic,
+                        score: findUser.score,
                         rating: findUser.rating,
                         access_token: access_token
                     })
@@ -89,10 +90,11 @@ class Controller {
         try {
             const { googletoken } = req.headers
             const clientId = process.env.CLIENT_ID
+            console.log(clientId);
             const client = new OAuth2Client(clientId);
             const ticket = await client.verifyIdToken({
                 idToken: googletoken,
-                audience: clientId
+                requiredAudience: clientId
             });
             const payload = ticket.getPayload();
             const email = payload.email
@@ -103,7 +105,8 @@ class Controller {
                 user = await User.create({
                     email,
                     name,
-                    password: "12345"
+                    password: "12345",
+                    gender: 'male'
                 });
             }
             const access_token = signToken(
@@ -112,15 +115,42 @@ class Controller {
                     email: user.email,
                 }
             )
-            res.json({
+            res.json(
                 access_token,
-            })
+            )
 
         } catch (error) {
             console.log(error)
             next(error)
         }
     }
+
+
+    static async getAllUser(req, res, next) {
+        try {
+            console.log("MASUKKKKKK")
+            const users = await User.find();
+
+            res.status(200).json(users);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getUserById(req, res, next) {
+        try {
+            console.log("MASUK")
+            const { id } = req.params;
+
+            const user = await User.findOne({ _id: id });
+
+            if (!user) {
+                throw { name: 'notFound' };
+            }
+
+            res.status(200).json(user);
+        } catch (error) {
+            next(error);
 
     static async addUserSports(req, res, next){
         try {
