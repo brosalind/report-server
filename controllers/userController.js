@@ -1,131 +1,133 @@
-const User = require("../models/User")
+const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
-const { OAuth2Client } = require('google-auth-library')
+const { OAuth2Client } = require("google-auth-library");
 
 class Controller {
-    static async createUser(req, res, next) {
-        try {
-            const { name, username, gender, email, password } = req.body
+  static async createUser(req, res, next) {
+    try {
+      console.log(req.body);
+      const { name, username, gender, email, password } = req.body;
 
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                throw { name: "User already exist" }
-            }
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        throw { name: "User already exist" };
+      }
 
-            const user = await User.create({
-                name,
-                username,
-                gender,
-                email,
-                password,
-                role: "user",
-                pic: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
-                score: 0,
-                rating: 0
-            })
+      const user = await User.create({
+        name,
+        username,
+        gender,
+        email,
+        password,
+        role: "user",
+        pic: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        score: 0,
+        rating: 0,
+      });
 
-            const access_token = signToken(
-                {
-                    id: user._id,
-                    email: user.email,
-                }
-            )
+      const access_token = signToken({
+        id: user._id,
+        email: user.email,
+      });
 
-            res.status(201).json({ message: 'User created successfully', user, access_token });
-        } catch (error) {
-            console.error(error);
-            next(error)
-        }
+      res
+        .status(201)
+        .json({ message: "User created successfully", user, access_token });
+    } catch (error) {
+      console.error(error);
+      next(error);
     }
+  }
 
-    static async userLogin(req, res, next) {
-        try {
-            const { email, password } = req.body
+  static async userLogin(req, res, next) {
+    try {
+      const { email, password } = req.body;
 
-            if (!email) {
-                throw { name: 'noEmail' }
-            }
-            if (!password) {
-                throw { name: 'noPassword' }
-            }
+      if (!email) {
+        throw { name: "noEmail" };
+      }
+      if (!password) {
+        throw { name: "noPassword" };
+      }
 
-            const findUser = await User.findOne({ email })
+      const findUser = await User.findOne({ email });
 
-            if (!findUser) {
-                throw { name: 'userDoesNotExist' }
-            } else {
-                const isPasswordValid = bcrypt.compareSync(req.body.password, findUser.password)
+      if (!findUser) {
+        throw { name: "userDoesNotExist" };
+      } else {
+        const isPasswordValid = bcrypt.compareSync(
+          req.body.password,
+          findUser.password
+        );
 
-                if (!isPasswordValid) {
-                    throw { name: `Invalid Login` }
-                } else {
-                    const access_token = signToken(
-                        {
-                            id: findUser._id,
-                            email: findUser.email,
-                        }
-                    )
-                    res.status(200).json({
-                        name: findUser.name, 
-                        username: findUser.username, 
-                        gender: findUser.gender, 
-                        email: findUser.email, 
-                        role: findUser.role, 
-                        pic: findUser.pic, 
-                        score: findUser.score, 
-                        rating: findUser.rating,
-                        access_token: access_token
-                    })
-                }
-            }
-        } catch (err) {
-            next(err)
+        if (!isPasswordValid) {
+          throw { name: `Invalid Login` };
+        } else {
+          const access_token = signToken({
+            id: findUser._id,
+            email: findUser.email,
+          });
+          res.status(200).json({
+            name: findUser.name,
+            username: findUser.username,
+            gender: findUser.gender,
+            email: findUser.email,
+            role: findUser.role,
+            pic: findUser.pic,
+            score: findUser.score,
+            rating: findUser.rating,
+            access_token: access_token,
+          });
         }
+      }
+    } catch (err) {
+      next(err);
     }
+  }
 
-    static async googleLogin(req, res, next) {
-        console.log(req.headers, '<<<<');
-        try {
-            const { googletoken } = req.headers
-            const clientId = process.env.CLIENT_ID
-            const client = new OAuth2Client(clientId);
-            const ticket = await client.verifyIdToken({
-                idToken: googletoken,
-                audience: clientId
-            });
-            const payload = ticket.getPayload();
-            const email = payload.email
-            const name = payload.name
-            // res.json({email, name})
+  static async googleLogin(req, res, next) {
+    console.log(req.headers, "<<<<");
+    try {
+      const { googletoken } = req.headers;
+      const clientId = process.env.CLIENT_ID;
+      const client = new OAuth2Client(clientId);
+      const ticket = await client.verifyIdToken({
+        idToken: googletoken,
+        audience: clientId,
+      });
+      const payload = ticket.getPayload();
+      const email = payload.email;
+      const name = payload.name;
+      // res.json({email, name})
 
-            let user = await User.findOne({ email });
+      let user = await User.findOne({ email });
 
-            if (!user) {
-                user = await User.create({
-                    email,
-                    name,
-                    password: "12345"
-                });
-            }
+      if (!user) {
+        user = await User.create({
+          email,
+          name,
+          password: "12345",
+        });
+      }
 
-            console.log(user);
+      console.log(user);
 
-            const access_token = signToken(
-                {
-                    id: user.id,
-                    email: user.email,
-                }
-            )
-            res.json({
-                access_token,
-            })
+      const access_token = signToken({
+        id: user.id,
+        email: user.email,
+      });
 
-        } catch (error) {
-            console.log(error)
-            next(error)
-        }
+      const score = user.score;
+      res.status(200).json({
+        access_token,
+        score,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 }
 
-module.exports = Controller
+module.exports = Controller;
