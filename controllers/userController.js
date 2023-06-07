@@ -59,7 +59,6 @@ class Controller {
                 throw { name: 'userDoesNotExist' }
             } else {
                 const isPasswordValid = bcrypt.compareSync(req.body.password, findUser.password)
-
                 if (!isPasswordValid) {
                     throw { name: `Invalid Login` }
                 } else {

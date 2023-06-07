@@ -134,7 +134,8 @@ class eventController {
                 _id: eventId
             })
 
-            const isUserAlreadyAParticipant = currentEvent.participants.find(user => user = req.user._id)
+            const isUserAlreadyAParticipant = currentEvent.participants.find(user => user === req.user._id)
+  
             if (isUserAlreadyAParticipant) {
                 throw { name: "alreadyJoined" }
             }
@@ -294,6 +295,21 @@ class eventController {
             res.json(updatedEvent)
 
         } catch (err) {
+            next(err)
+        }
+    }
+
+    static async checkAttendance(req, res, next){
+        try {
+            const eventId = req.params.id
+
+            const currentEvent = await Event.findById({
+                _id: eventId
+            })
+
+            console.log(currentEvent.participants)
+
+        }catch(err){
             next(err)
         }
     }
