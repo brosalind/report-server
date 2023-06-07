@@ -30,6 +30,7 @@
     "mongoose-unique-validator": "^4.0.0",
     "nodemon": "^2.0.22",
     "socket.io": "^4.6.2",
+    "socket.io-client": "^4.6.2",
     "validator": "^13.9.0"
   },
   "devDependencies": {
