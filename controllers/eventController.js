@@ -262,8 +262,8 @@ class eventController {
 
   static async startEvent(req, res, next) {
     try {
-      const eventId = req.params.id;
-
+      const eventId = req.params.eventId;
+      // console.log(eventId, "<<");
       const currentEvent = await Event.findById({
         _id: eventId,
       });
@@ -288,7 +288,8 @@ class eventController {
         _id: eventId,
       })
         .populate("creator")
-        .populate("participants.user");
+        .populate("participants.user")
+        .populate("sport");
 
       res.json(updatedEvent);
     } catch (err) {
