@@ -14,5 +14,4 @@ eventRouter.delete('/:eventId', deleteEventAuthorization, eventController.cancel
 eventRouter.patch('/:eventId', deleteEventAuthorization, eventController.closeEvent)
 eventRouter.patch('/:id', deleteEventAuthorization, eventController.startEvent)
 eventRouter.put('/:myEventId/leave',leaveEventAuthorization, eventController.leaveEvent)
-eventRouter.patch('/:id/attendance', eventController.checkAttendance)
 module.exports = eventRouter

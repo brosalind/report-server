@@ -12,4 +12,5 @@ userRouter.put('/addSports', authentication, Controller.addUserSports)
 userRouter.put('/editGenderProf', authentication, Controller.editUserGenderProf)
 userRouter.put('/editProfile', authentication, Controller.editUserProfile)
 userRouter.get('/data/:id', Controller.getUserById)
+
 module.exports = userRouter

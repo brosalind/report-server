@@ -1,6 +1,8 @@
 const Event = require('../models/Event')
 const { formatPrice } = require('../helpers/formatPrice')
 const Sport = require('../models/Sport')
+const Discussion = require('../models/Discussion')
+const Message = require('../models/Message')
 
 class eventController {
     static async addEvent(req, res, next) {
@@ -50,6 +52,7 @@ class eventController {
         }
     }
 
+    
     static async getAllEvents(req, res, next) {
         try {
             const allEvents = await Event.find()
@@ -299,44 +302,27 @@ class eventController {
         }
     }
 
-    static async checkAttendance(req, res, next){
+    static async getDiscussion(req, res, next){
         try {
-            const eventId = req.params.id
-            const {attended} = req.body
-
-            const currentEvent = await Event.findById({
-                _id: eventId
+            const discussionData = await Discussion.find({
+                eventId: req.params.id
             })
 
-            const participants = await Promise.all(currentEvent.participants.map(async (el) => {
-                
-            }))
+            if(discussionData.length <1){
+                throw {name: "notFound"}
+            } else {
 
-            const sports = await Promise.all(sportList.map(async (el) => {
+                const discussionPosts = await Message.find({
+                    discussion: discussionData[0]._id
+                }).populate('sender')
 
-                let sport = await Sport.find({name: el.name})   
-                
-                let obj = {
-                    name: sport[0]._id,
-                    level: el.level
-                }
-                result.push(obj)
-                return result
-
-            }))
-
-            currentUser.sport = result
-
-            await currentUser.save()
-
-            const currentUserUpdate = await User.findById(req.user._id).populate('sport.name')
-
-            res.json({ currentUserUpdate})
-
-            console.log(currentEvent.participants)
+                res.json(discussionPosts)
+            }
+   
 
         }catch(err){
             next(err)
+
         }
     }
 

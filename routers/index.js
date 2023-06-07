@@ -6,10 +6,12 @@ const ratingRouter = require('../routers/rating')
 const {errorHandler} = require('../middlewares/errorHandler')
 const {authentication} = require('../middlewares/authentication')
 const eventController = require('../controllers/eventController')
+const discussionRouter = require('./discussion')
 
 router.use('/user', userRouter)
 router.get('/eventlist', eventController.getAllEvents)
 router.use('/event', authentication, eventRouter)
 router.use('/rating', ratingRouter)
+router.use('/discussion', discussionRouter)
 router.use(errorHandler)
-module.exports = router ,userRouter, eventRouter, ratingRouter
+module.exports = router ,userRouter, eventRouter, ratingRouter, discussionRouter

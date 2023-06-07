@@ -4,6 +4,7 @@ const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require('google-auth-library')
 require('dotenv').config({path:'../.env'})
 const Sport = require('../models/Sport')
+const Event = require('../models/Event')
 
 class Controller {
     
@@ -154,6 +155,7 @@ class Controller {
         }
     }
 
+
     static async addUserSports(req, res, next){
         try {
             const currentUser = await User.findById(req.user._id)
@@ -239,6 +241,7 @@ class Controller {
             next(err)
         }
     }
+
 }
 
 module.exports = Controller
