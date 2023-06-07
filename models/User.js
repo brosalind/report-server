@@ -12,6 +12,7 @@ const UserSchema = mongoose.Schema({
     type: String,
     unique: true,
     uniqueCaseInsensitive: true,
+    default: "user",
   },
   email: {
     type: String,
@@ -35,7 +36,7 @@ const UserSchema = mongoose.Schema({
   pic: {
     type: String,
     default:
-      "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+      "https://img.freepik.com/premium-vector/head-fox-mascot-sport-logo_167235-1031.jpg?w=2000",
   },
   score: {
     type: Number,
@@ -47,7 +48,20 @@ const UserSchema = mongoose.Schema({
   },
   gender: {
     type: String,
-    default: "Male",
+  },
+  sport: [
+    {
+      name: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Sport",
+      },
+      level: {
+        type: String,
+      },
+    },
+  ],
+  location: {
+    type: String,
   },
 });
 

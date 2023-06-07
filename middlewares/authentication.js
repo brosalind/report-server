@@ -1,28 +1,28 @@
-const jwt = require('jsonwebtoken')
-const { verifyToken } = require('../helpers/jwt')
-const User  = require('../models/User')
+const jwt = require("jsonwebtoken");
+const { verifyToken } = require("../helpers/jwt");
+const User = require("../models/User");
 
 const authentication = async (req, res, next) => {
-    try {
-    const { access_token } = req.headers
-    
-    if(!access_token){
-        throw {name: 'Unauthorized'}
-    } else{
-        const decodeToken = verifyToken(access_token)
+  try {
+    const { access_token } = req.headers;
 
-        const userDatabase = await User.findById(decodeToken.id)
+    if (!access_token) {
+      throw { name: "Unauthorized" };
+    } else {
+      const decodeToken = verifyToken(access_token);
 
-        if(!userDatabase){
-            throw {name: 'Unauthorized'}
-        }else{
-            req.user = userDatabase
-            next()
-        }
+      const userDatabase = await User.findById(decodeToken.id);
+
+      if (!userDatabase) {
+        throw { name: "Unauthorized" };
+      } else {
+        req.user = userDatabase;
+        next();
+      }
     }
-    } catch (err) {
-        next(err)
-    }
-}
+  } catch (err) {
+    next(err);
+  }
+};
 
-module.exports = {authentication}
+module.exports = { authentication };

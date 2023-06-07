@@ -2,16 +2,17 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { signToken, verifyToken } = require("../helpers/jwt");
 const { OAuth2Client } = require("google-auth-library");
+require("dotenv").config({ path: "../.env" });
+const Sport = require("../models/Sport");
 
 class Controller {
   static async createUser(req, res, next) {
     try {
-      console.log(req.body);
       const { name, username, gender, email, password } = req.body;
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        throw { name: "User already exist" };
+        throw { name: "User already exists" };
       }
 
       const user = await User.create({
@@ -68,7 +69,8 @@ class Controller {
             id: findUser._id,
             email: findUser.email,
           });
-          res.status(200).json({
+          const user = {
+            id: findUser._id,
             name: findUser.name,
             username: findUser.username,
             gender: findUser.gender,
@@ -77,6 +79,9 @@ class Controller {
             pic: findUser.pic,
             score: findUser.score,
             rating: findUser.rating,
+          };
+          res.status(200).json({
+            user,
             access_token: access_token,
           });
         }
@@ -87,10 +92,10 @@ class Controller {
   }
 
   static async googleLogin(req, res, next) {
-    console.log(req.headers, "<<<<");
     try {
       const { googletoken } = req.headers;
       const clientId = process.env.CLIENT_ID;
+      console.log(clientId);
       const client = new OAuth2Client(clientId);
       const ticket = await client.verifyIdToken({
         idToken: googletoken,
@@ -99,7 +104,6 @@ class Controller {
       const payload = ticket.getPayload();
       const email = payload.email;
       const name = payload.name;
-      // res.json({email, name})
 
       let user = await User.findOne({ email });
 
@@ -108,24 +112,150 @@ class Controller {
           email,
           name,
           password: "12345",
+          gender: "male",
         });
       }
-
-      console.log(user);
-
       const access_token = signToken({
         id: user.id,
         email: user.email,
       });
 
-      const score = user.score;
-      res.status(200).json({
-        access_token,
-        score,
-      });
+      const data = {
+        id: user._id,
+        email: user.email,
+        score: user.score,
+        username: user.username,
+      };
+      console.log(access_token, data);
+      res.status(201).json({ access_token, data });
     } catch (error) {
       console.log(error);
       next(error);
+    }
+  }
+
+  static async getAllUser(req, res, next) {
+    try {
+      console.log("MASUKKKKKK");
+      const users = await User.find();
+
+      res.status(200).json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getUserById(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const user = await User.findOne({ _id: id });
+      console.log(id, user, "<<");
+      if (!user) {
+        throw { name: "notFound" };
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async addUserSports(req, res, next) {
+    try {
+      const currentUser = await User.findById(req.user._id);
+
+      const { sportList } = req.body;
+
+      console.log(sportList);
+      let result = [];
+      await Promise.all(
+        sportList.map(async (el) => {
+          let sport = await Sport.find({ name: el.name });
+          console.log(sport);
+          let obj = {
+            name: sport[0]._id,
+            // level: el.isPressed,
+          };
+          result.push(obj);
+        })
+      );
+
+      currentUser.sport = result;
+
+      await currentUser.save();
+
+      const currentUserUpdate = await User.findById(req.user._id).populate(
+        "sport.name"
+      );
+
+      res.json({ currentUserUpdate });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async editUserGenderProf(req, res, next) {
+    try {
+      let { gender, location } = req.body;
+      let pic = req.file?.path;
+
+      if (!pic || !pic.trim().length) {
+        pic =
+          "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg";
+      }
+
+      let newData = {
+        pic,
+      };
+
+      if (gender) {
+        newData.gender = gender;
+      }
+
+      if (location) {
+        newData.location = location;
+      }
+
+      const update = {
+        $set: newData,
+      };
+      const user = await User.findOneAndUpdate(
+        {
+          _id: req.user._id,
+        },
+        update
+      );
+
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async editUserProfile(req, res, next) {
+    try {
+      const update = {
+        $set: {
+          name: req.body.name,
+          username: req.body.username,
+          email: req.body.email,
+          gender: req.body.gender,
+          sportList: req.body.sportList,
+          pic: req.path?.file,
+        },
+      };
+
+      const user = await User.findOneAndUpdate(
+        {
+          _id: req.user._id,
+        },
+        update
+      );
+
+      res.json(user);
+    } catch (err) {
+      next(err);
     }
   }
 }
