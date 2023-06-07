@@ -116,7 +116,7 @@ class eventController {
       });
 
       const isUserAlreadyAParticipant = currentEvent.participants.find(
-        (user) => (user = req.user._id)
+        (user) => user === req.user._id
       );
       if (isUserAlreadyAParticipant) {
         throw { name: "alreadyJoined" };
