@@ -5,7 +5,8 @@ const port = process.env.PORT || 3000
 const mongoose = require('mongoose');
 const router = require('./routers')
 const cors = require('cors')
-const socket = require('socket.io')
+const socket = require('socket.io');
+const { handleSocket } = require('./socket');
 const server = require('http').createServer(app)
 const io = require('socket.io')(server, {
   cors: {
@@ -17,9 +18,10 @@ const io = require('socket.io')(server, {
 }
 )
 
-const Discussion = require('./models/Discussion')
-const Message = require('./models/Message')
-const User = require('./models/User')
+
+// const Discussion = require('./models/Discussion')
+// const Message = require('./models/Message')
+// const User = require('./models/User')
 
 app.use(cors())
 
@@ -37,41 +39,44 @@ mongoose.connect(process.env.DB_LINK).then(() => {
 })
 
 
-io.on("connection", (socket) => {
-  console.log("connected", socket.id)
+handleSocket(io)
 
-  socket.on("message-received", async (data) => {
-    try {
-      const doesDiscussionExist = await Discussion.find({ eventId: data.eventId })
+
+// io.on("connection", (socket) => {
+//   console.log("connected", socket.id)
+
+//   socket.on("message-received", async (data) => {
+//     try {
+//       const doesDiscussionExist = await Discussion.find({ eventId: data.eventId })
   
-        const findUser = await User.find({ email: data.userEmail })
+//         const findUser = await User.find({ email: data.userEmail })
   
-        if (doesDiscussionExist.length > 1) {
-          const newMessage = await Message.create({
-            sender: findUser._id,
-            content: data.message,
-            discussion: doesDiscussionExist[0]._id
-          })
-        } else {
-          const newDiscussion = await Discussion.create({
-            eventId: data.eventId,
-            users: findUser._id
-          })
-          const newMessage = await Message.create({
-            sender: findUser._id,
-            content: data.message,
-            discussion: newDiscussion._id
-          })
-        }
-        socket.broadcast.emit("message-stored", data.message)
-      } catch (err) {
-        console.log(err)
-      }   
-  })
+//         if (doesDiscussionExist.length > 1) {
+//           const newMessage = await Message.create({
+//             sender: findUser._id,
+//             content: data.message,
+//             discussion: doesDiscussionExist[0]._id
+//           })
+//         } else {
+//           const newDiscussion = await Discussion.create({
+//             eventId: data.eventId,
+//             users: findUser._id
+//           })
+//           const newMessage = await Message.create({
+//             sender: findUser._id,
+//             content: data.message,
+//             discussion: newDiscussion._id
+//           })
+//         }
+//         socket.broadcast.emit("message-stored", data.message)
+//       } catch (err) {
+//         console.log(err)
+//       }   
+//   })
 
-  socket.on('disconnect', () => {
-    console.log("disconnected")
-  })
-})
+//   socket.on('disconnect', () => {
+//     console.log("disconnected")
+//   })
+// })
 
-module.exports = app
+// module.exports = app

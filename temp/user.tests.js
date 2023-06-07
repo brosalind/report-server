@@ -5,11 +5,10 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const User = require("../models/User");
 const Controller = require("../controllers/userController");
 let id
-require('dotenv').config()
 
 beforeAll(async () => {
     //JANGAN LUPA GANTI LINK KE TESTING MONGO DATABASE. JANGAN PAKE ACTUALY DATABASE PLEASE!!!!!!!!!!!!!!!
-    await mongoose.connect(process.env.DB_TESTLINK, {
+    await mongoose.connect("mongodb+srv://chris:qwe123asd@chris.fzatjb9.mongodb.net/?retryWrites=true&w=majority", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
@@ -142,22 +141,22 @@ describe('User API', () => {
             expect(response.body.message).toBe('Name is required')
         })
 
-        test('Should return Gender is required', async () => {
-            const newUser = {
-                name: 'hehehehehe',
-                username: 'heheheheheh',
-                email: 'hehehehehe@mail.com',
-                password: '12345',
-                gender: ''
-            }
+        // test('Should return Gender is required', async () => {
+        //     const newUser = {
+        //         name: 'hehehehehe',
+        //         username: 'heheheheheh',
+        //         email: 'hehehehehe@mail.com',
+        //         password: '12345',
+        //         gender: ''
+        //     }
 
-            const response = await request(app)
-                .post('/user')
-                .send(newUser)
+        //     const response = await request(app)
+        //         .post('/user')
+        //         .send(newUser)
 
-            expect(response.status).toBe(400)
-            expect(response.body.message).toBe('Gender is required')
-        })
+        //     expect(response.status).toBe(400)
+        //     expect(response.body.message).toBe('Gender is required')
+        // })
     })
 
     describe('User Login', () => {

@@ -302,10 +302,36 @@ class eventController {
     static async checkAttendance(req, res, next){
         try {
             const eventId = req.params.id
+            const {attended} = req.body
 
             const currentEvent = await Event.findById({
                 _id: eventId
             })
+
+            const participants = await Promise.all(currentEvent.participants.map(async (el) => {
+                
+            }))
+
+            const sports = await Promise.all(sportList.map(async (el) => {
+
+                let sport = await Sport.find({name: el.name})   
+                
+                let obj = {
+                    name: sport[0]._id,
+                    level: el.level
+                }
+                result.push(obj)
+                return result
+
+            }))
+
+            currentUser.sport = result
+
+            await currentUser.save()
+
+            const currentUserUpdate = await User.findById(req.user._id).populate('sport.name')
+
+            res.json({ currentUserUpdate})
 
             console.log(currentEvent.participants)
 

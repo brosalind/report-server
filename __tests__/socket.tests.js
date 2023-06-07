@@ -5,7 +5,7 @@ const { Server } = require("socket.io");
 const Client = require("socket.io-client");
 
 
-describe("my awesome project", () => {
+describe("Socket Testing", () => {
   let io, serverSocket, clientSocket;
 
   beforeAll((done) => {
@@ -26,12 +26,22 @@ describe("my awesome project", () => {
     clientSocket.close();
   });
 
-  test("should work", (done) => {
-    clientSocket.on("hello", (arg) => {
-      expect(arg).toBe("world");
-      done();
-    });
-    serverSocket.emit("hello", "world");
+  test("handle message-received event", (done) => {
+    // clientSocket.on("message-received", (arg) => {
+      const eventData= {
+        eventId: 'event1',
+        userEmail: 'user@mail.com',
+        message: "this is my message"
+      }
+      // expect(arg).toBe(eventData);
+      // done();
+    // });
+    io.emit("message-received", eventData);
+
+    io.on("message-stored", (message) => {
+      expect(message).toEqual(eventData.message)
+      done()
+    })
   });
 
   test("should work (with ack)", (done) => {
