@@ -70,6 +70,7 @@ UserSchema.pre('save', async function(next) {
     user.password = bcrypt.hashSync(user.password, salt)
 
 })
+
 const User = mongoose.model("User", UserSchema)
 
 module.exports = User

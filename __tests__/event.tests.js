@@ -7,7 +7,10 @@ const eventController = require("../controllers/eventController");
 const User = require("../models/User");
 const { signToken } = require("../helpers/jwt");
 let access_token;
+let access_token2;
 let eventId;
+let eventId2;
+let eventId3;
 
 beforeEach(() => {
     jest.restoreAllMocks();
@@ -35,8 +38,23 @@ beforeAll(async () => {
         }
     )
 
+    const user2 = await User.create({
+        name: 'ipin',
+        username: 'ipin',
+        email: 'ipin@mail.com',
+        password: '12345',
+        gender: 'male'
+    })
+
+    access_token2 = signToken(
+        {
+            id: user2._id,
+            email: "ipin@mail.com",
+        }
+    )
+
     const event = await Event.create({
-        title: 'Test Delete Event',
+        title: 'This is global state event',
         location: 'Test Location',
         date: '2023-06-07',
         courtPrice: 100000,
@@ -44,6 +62,31 @@ beforeAll(async () => {
         creator: user._id
     })
     eventId = event._id
+
+    const event2 = await Event.create({
+        title: 'This is global state event',
+        location: 'Test Location',
+        date: '2023-06-07',
+        courtPrice: 100000,
+        limitParticipants: 8,
+        creator: user2._id,
+        participants: [
+            { user2 }
+        ]
+    })
+    eventId2 = event2._id
+
+    const event3 = await Event.create({
+        title: 'This is global state event',
+        location: 'Test Location',
+        date: '2023-06-07',
+        courtPrice: 100000,
+        limitParticipants: 8,
+        creator: user._id,
+        status: 'Close'
+    })
+    eventId3 = event3._id
+
 }, 10000);
 
 afterAll(async () => {
@@ -362,15 +405,15 @@ describe('Event API', () => {
         //     expect(response1.status).toBe(500)
         // })
 
-        test.only('Should return error on event by ID', async () => {
-            jest.spyOn(Event, "findById").mockRejectedValue("Error");
+        test('Should return error on event by ID', async () => {
+            jest.spyOn(Event.EventModel, "findById").mockRejectedValue("Error");
             const response = await request(app)
                 .get(`/event/${eventId}`)
                 .set('access_token', access_token)
 
-                console.log(response.body, "INI RESPONSE")
-                expect(response.status).toBe(500)
-                expect(response.body.message).toBe('Something happened. Please try again later.')
+            console.log(response.body, "INI RESPONSE")
+            expect(response.status).toBe(500)
+            expect(response.body.message).toBe('Something happened. Please try again later.')
         })
     })
     describe('Cancel Event', () => {
@@ -491,6 +534,17 @@ describe('Event API', () => {
             expect(failedCancel.status).toBe(403)
             expect(failedCancel.body.message).toBe("We're sorry, but you don't have access.")
         })
+        test('Should return event not found', async () => {
+            let eventId = "64803d52ad314bedab2a3263"
+
+            const response = await request(app)
+                .delete(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            // console.log(response)
+            expect(response.status).toBe(404)
+            expect(response.body.message).toBe("What you're looking for does not exist.")
+        })
     })
 
     describe('Join Event', () => {
@@ -602,58 +656,13 @@ describe('Event API', () => {
             expect(joinEvent._body.message).toBe("You can't join an event you create.")
         })
 
-        //ERROR
         test('should return error notFound', async () => {
-            let access_token1;
-            let access_token2;
             let eventId = '647f64c07b21b45496acd009'
-
-            const user1 = {
-                name: 'levi',
-                username: 'levi',
-                email: 'levi@mail.com',
-                password: '12345',
-                gender: 'male'
-            }
-
-            const account1 = await request(app)
-                .post('/user')
-                .send(user1)
-            access_token1 = account1._body.access_token
-
-            const user2 = {
-                name: 'sasha',
-                username: 'sasha',
-                email: 'sasha@mail.com',
-                password: '12345',
-                gender: 'female'
-            }
-
-            const account2 = await request(app)
-                .post('/user')
-                .send(user2)
-            access_token2 = account2._body.access_token
-
-            // const mockEvent = {
-            //     title: 'Test Delete Event',
-            //     location: 'Test Location',
-            //     date: '2023-06-07',
-            //     courtPrice: 50000,
-            //     limitParticipants: 6,
-            // }
-
-            // const response = await request(app)
-            //     .post('/event')
-            //     .send(mockEvent)
-            //     .set('access_token', access_token1)
-
-            //     eventId = response._body._id
-
 
             const joinEvent = await request(app)
                 .put(`/event/${eventId}`)
-                .set('access_token', access_token1)
-                .expect(400)
+                .set('access_token', access_token)
+                .expect(404)
 
             expect(joinEvent._body.message).toBe("What you're looking for does not exist.")
         })
@@ -756,47 +765,19 @@ describe('Event API', () => {
 
             expect(closeEvent._body.status).toBe('Close')
         })
-        //YANG INI GBS GANTI STATUS OPEN JADI CLOSED
         test('should return error alreadyClose', async () => {
-            let access_token1
-            let eventId;
-            let eventStatus;
-
-            const user1 = {
-                name: 'thx',
-                username: 'thx',
-                email: 'thx@mail.com',
-                password: '12345',
-                gender: 'male'
-            }
-
-            const account1 = await request(app)
-                .post('/user')
-                .send(user1)
-            access_token1 = account1._body.access_token
-
-            const mockEvent = {
-                title: 'Close Event Testing',
-                location: 'Test Location',
-                date: '2023-06-07',
-                courtPrice: 50000,
-                limitParticipants: 6,
-                status: 'Close'
-            }
-
-            const response = await request(app)
-                .post('/event')
-                .send(mockEvent)
-                .set('access_token', access_token1)
-            eventId = response._body._id
-            eventStatus = response._body.status
-
             const closeEvent = await request(app)
-                .patch(`/event/${eventId}`)
-                .set("access_token", access_token1)
-            // console.log(closeEvent)
+                .patch(`/event/${eventId3}`)
+                .set("access_token", access_token)
+            console.log(closeEvent)
 
-            expect(closeEvent._body.status).toBe('Close')
+
+            expect(closeEvent.body.message).toBe('Event has finished already.')
+            expect(closeEvent.status).toBe(400)
+        })
+        // test nex(err) nya
+        test('should return server internal error', async () => {
+
         })
     })
 
@@ -920,7 +901,116 @@ describe('Event API', () => {
             expect(leaveEvent.status).toBe(500)
             expect(leaveEvent._body.message).toBe('Something happened. Please try again later.')
         })
+
+        test('Should return NO ACCESS', async () => {
+            // jest.spyOn(Event, "findByIdAndUpdate").mockRejectedValue("Error");
+            const response = await request(app)
+                .put(`/event/${eventId}/leave`)
+                .set('access_token', access_token)
+
+            expect(response.body.message).toBe("We're sorry, but you don't have access.")
+
+            console.log(response.body)
+        })
+
+        test('Should return internal server error', async () => {
+
+            const heheUser = await User.create({
+                name: 'lol',
+                username: 'lol',
+                email: 'lol@mail.com',
+                password: '12345',
+                gender: 'male'
+            })
+
+            const access_tokenhehe = signToken(
+                {
+                    id: heheUser._id,
+                    email: "lol@mail.com",
+                }
+            )
+
+            const heheEvent = await Event.create({
+                title: 'HEHE EVENT',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 100000,
+                limitParticipants: 8,
+                creator: heheUser._id,
+                participants: [
+                    {
+                        user: heheUser
+                    }
+                ]
+            })
+
+            jest.spyOn(Event, "findOneAndUpdate").mockRejectedValue("Error");
+            
+            const leaveEvent = await request(app)
+                .put(`/event/${heheEvent._id}/leave`)
+                .set('access_token', access_tokenhehe)
+
+                expect(leaveEvent.status).toBe(500)
+                expect(leaveEvent.body.message).toBe('Something happened. Please try again later.')
+
+        })
     })
 
-    // describe('Start Event')
+    describe('Start Event', () => {
+        test('Should start the event (ONGOING STATUS)', async () => {
+            const response = await request(app)
+                .patch(`/event/${eventId2}/start`)
+                .set('access_token', access_token2)
+
+            expect(response.status).toBe(200)
+        })
+
+        test('Should return event already close', async () => {
+
+            let access_tokenDummy;
+            let eventDummyId;
+
+            const dummyUser = {
+                name: 'ross',
+                username: 'ross',
+                email: 'ross@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const dummyAccount = await request(app)
+                .post('/user')
+                .send(dummyUser)
+            access_tokenDummy = dummyAccount._body.access_token
+
+            const dummyEventData = {
+                title: 'This is global state event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 100000,
+                limitParticipants: 8,
+                creator: dummyAccount._id,
+            }
+            const dummyEvent = await request(app)
+                .post('/event')
+                .send(dummyEventData)
+                .set('access_token', access_tokenDummy)
+
+            eventDummyId = dummyEvent.body._id
+
+            const closeEvent = await request(app)
+                .patch(`/event/${eventDummyId}`)
+                .set("access_token", access_tokenDummy)
+
+
+            const startEvent = await request(app)
+                .patch(`/event/${eventDummyId}/start`)
+                .set('access_token', access_tokenDummy)
+
+            expect(startEvent.body.message).toBe("Event has finished already.")
+            // console.log(startEvent.body.message)
+            // console.log(startEvent)
+
+        })
+    })
 })

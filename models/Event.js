@@ -58,6 +58,25 @@ class EventModel {
             throw error
         }
     }
+
+    static async findById(id){
+        try {
+            return await Event.findById().populate('creator').populate('participants.user').populate('sport')
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    static async findByIdAndUpdate(id, user){
+        try {
+            return await Event.findByIdAndUpdate(id, { $pull: { participants: { user: user } } },
+                { new: true })
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
 }
 Event.EventModel = EventModel
 module.exports = Event

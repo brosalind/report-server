@@ -6,13 +6,16 @@ const deleteEventAuthorization = async (req, res, next) => {
         const foundEvent = await Event.findOne({
             _id: req.params.eventId
         })
-        console.log(foundEvent, "MASUK DELETE")
+        // console.log(foundEvent)
+        // console.log(foundEvent, "MASUK DELETE")
         if(!foundEvent){
+            console.log("EVENTNYA GAK ADA BRO")
             throw {name: "notFound"}
         }
         if (!foundEvent.creator.equals(req.user._id)) {
             throw { name: 'Unauthorized' }
         } 
+        console.log('pass');
         next()
     }
     catch(err){

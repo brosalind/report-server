@@ -117,11 +117,12 @@ class eventController {
     static async getEventDetails(req, res, next) {
         try {
             const eventId = req.params.eventId
-            const selectedEvent = await Event.findById({
+            const selectedEvent = await Event.EventModel.findById({
                 _id: eventId
-            }).populate('creator').populate('participants.user').populate('sport')
-            res.json(selectedEvent)
-
+            })
+            
+            // Event.populate('creator').populate('participants.user').populate('sport')
+            res.status(200).json(selectedEvent)
         } catch (err) {
             next(err)
         }
@@ -135,6 +136,10 @@ class eventController {
                 _id: eventId
             })
 
+            if (!currentEvent) {
+                throw { name: "notFound" }
+            }
+
             const isUserAlreadyAParticipant = currentEvent.participants.find(user => user = req.user._id)
             if (isUserAlreadyAParticipant) {
                 throw { name: "alreadyJoined" }
@@ -144,9 +149,6 @@ class eventController {
                 throw { name: "participantCreator" }
             }
 
-            if (!currentEvent) {
-                throw { name: "notFound" }
-            }
 
             if (currentEvent.totalParticipants === currentEvent.limitParticipants) {
                 throw { name: "eventFull" }
@@ -177,21 +179,18 @@ class eventController {
             res.json(updatedEvent)
 
         } catch (err) {
+            console.log(err)
             next(err)
         }
     }
 
     static async cancelEvent(req, res, next) {
         try {
-            console.log('MASUK')
             const eventId = req.params.eventId
             const deletedEvent = await Event.findOneAndRemove({
                 _id: eventId
             })
 
-            if (!deletedEvent) {
-                throw { name: "notFound" }
-            }
             res.json({ message: `${deletedEvent.title} was cancelled.` })
 
         } catch (err) {
@@ -201,14 +200,15 @@ class eventController {
     }
 
     static async leaveEvent(req, res, next) {
+        console.log('pass');
         try {
             const myEventId = req.params.myEventId
 
-            const event = await Event.findByIdAndUpdate(
-                myEventId,
-                { $pull: { participants: { user: req.user } } },
-                { new: true }
-            ).populate('creator').populate('participants.user').populate('sport')
+            const event = await Event.EventModel.findByIdAndUpdate(
+                myEventId, req.user
+            )
+            
+            // .populate('creator').populate('participants.user').populate('sport')
 
             // if (!event) {
             //     throw { name: "notFound" }
@@ -229,6 +229,7 @@ class eventController {
 
             res.json({ message: `You have successfully leave ${updateEvent.title}` })
         } catch (err) {
+            console.log(err, 'Ini ERROR LEAVE')
             next(err)
         }
     }
@@ -269,21 +270,24 @@ class eventController {
 
     static async startEvent(req, res, next) {
         try {
-            const eventId = req.params.id
-
+            const eventId = req.params.eventId
+            
             const currentEvent = await Event.findById({
                 _id: eventId
             })
-
+            // console.log(currentEvent)
+            
             if (currentEvent.status === 'Close') {
                 throw { name: "alreadyClose" }
             }
-
+            
             const update = {
                 $set: {
                     status: 'Ongoing',
                 }
             }
+            console.log("WOI")
+            
             const updateEventStatus = await Event.findOneAndUpdate({
                 _id: eventId
             }, update)
