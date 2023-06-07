@@ -6,6 +6,7 @@ const deleteEventAuthorization = async (req, res, next) => {
         const foundEvent = await Event.findOne({
             _id: req.params.eventId
         })
+        console.log(foundEvent, "MASUK DELETE")
         if(!foundEvent){
             throw {name: "notFound"}
         }

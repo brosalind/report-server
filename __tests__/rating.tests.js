@@ -76,7 +76,7 @@ describe('Add Rating', () => {
             expect(giveRating._body.message).toBe('Rating added successfully')
       });
       
-      test('Should return error', async () => {
+    test('Should return error', async () => {
         let accToken;
 
         const data1 = {

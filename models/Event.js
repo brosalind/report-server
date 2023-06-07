@@ -49,4 +49,15 @@ const EventSchema = mongoose.Schema({
 
 const Event = mongoose.model("Event", EventSchema)
 
+class EventModel {
+    static async findAll(){
+        try {
+            return await Event.find().populate('creator').populate('participants.user').populate('sport')
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+}
+Event.EventModel = EventModel
 module.exports = Event

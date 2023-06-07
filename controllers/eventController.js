@@ -1,6 +1,7 @@
 const Event = require('../models/Event')
 const { formatPrice } = require('../helpers/formatPrice')
 const Sport = require('../models/Sport')
+// const {EventModel} = require('../models/Event')
 
 class eventController {
     static async addEvent(req, res, next) {
@@ -52,8 +53,8 @@ class eventController {
 
     static async getAllEvents(req, res, next) {
         try {
-            const allEvents = await Event.find()
-                .populate('creator').populate('participants.user').populate('sport')
+            const allEvents = await Event.EventModel.findAll()
+            
             res.status(200).json(allEvents)
         } catch (err) {
             next(err)
@@ -182,6 +183,7 @@ class eventController {
 
     static async cancelEvent(req, res, next) {
         try {
+            console.log('MASUK')
             const eventId = req.params.eventId
             const deletedEvent = await Event.findOneAndRemove({
                 _id: eventId
@@ -193,6 +195,7 @@ class eventController {
             res.json({ message: `${deletedEvent.title} was cancelled.` })
 
         } catch (err) {
+            console.log(err, "INI CANCEL ERROR")
             next(err)
         }
     }
@@ -207,9 +210,9 @@ class eventController {
                 { new: true }
             ).populate('creator').populate('participants.user').populate('sport')
 
-            if (!event) {
-                throw { name: "notFound" }
-            }
+            // if (!event) {
+            //     throw { name: "notFound" }
+            // }
 
             let newTotalParticipant = event.totalParticipants - 1
             let newExpectedPrice = `${formatPrice(event.courtPrice / newTotalParticipant)} - ${formatPrice(event.courtPrice)}`

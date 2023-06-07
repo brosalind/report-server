@@ -4,7 +4,14 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const Event = require("../models/Event");
 const eventController = require("../controllers/eventController");
+const User = require("../models/User");
+const { signToken } = require("../helpers/jwt");
+let access_token;
+let eventId;
 
+beforeEach(() => {
+    jest.restoreAllMocks();
+});
 
 beforeAll(async () => {
     //JANGAN LUPA GANTI LINK KE TESTING MONGO DATABASE. JANGAN PAKE ACTUALY DATABASE PLEASE!!!!!!!!!!!!!!!
@@ -13,17 +20,44 @@ beforeAll(async () => {
         useUnifiedTopology: true,
     });
 
-});
+    const user = await User.create({
+        name: 'udin',
+        username: 'udin',
+        email: 'udin@mail.com',
+        password: '12345',
+        gender: 'male'
+    })
+
+    access_token = signToken(
+        {
+            id: user._id,
+            email: "udin@mail.com",
+        }
+    )
+
+    const event = await Event.create({
+        title: 'Test Delete Event',
+        location: 'Test Location',
+        date: '2023-06-07',
+        courtPrice: 100000,
+        limitParticipants: 8,
+        creator: user._id
+    })
+    eventId = event._id
+}, 10000);
 
 afterAll(async () => {
+    // await Event.deleteMany({});
+    await User.deleteMany({});
+    await Event.deleteMany({});
     await mongoose.disconnect();
-});
+}, 10000);
 
 describe('Event API', () => {
     describe('Add Event', () => {
-        test('Should create new event', async () => {
+        test('Should create new event (WITHOUT SPORT INFO)', async () => {
 
-            let access_token;
+            // let access_token;
 
             const newEvent = {
                 title: 'Test Event',
@@ -33,19 +67,19 @@ describe('Event API', () => {
                 limitParticipants: 8,
             }
 
-            const user = {
-                name: 'Chris',
-                username: 'Chris',
-                email: 'chris@mail.com',
-                password: '12345',
-                gender: 'male'
-            }
+            // const user = {
+            //     name: 'Chris',
+            //     username: 'Chris',
+            //     email: 'chris@mail.com',
+            //     password: '12345',
+            //     gender: 'male'
+            // }
 
-            const account = await request(app)
-                .post('/user')
-                .send(user)
+            // const account = await request(app)
+            //     .post('/user')
+            //     .send(user)
 
-            access_token = account._body.access_token
+            // access_token = account._body.access_token
 
             const response = await request(app)
                 .post('/event')
@@ -65,6 +99,39 @@ describe('Event API', () => {
             expect(response._body).toHaveProperty("status")
             expect(response._body).toHaveProperty("totalParticipants")
             expect(response._body).toHaveProperty("participants")
+        })
+
+        test('Should create new event (WITH SPORT INFO)', async () => {
+            let access_token;
+
+            const newEvent = {
+                title: 'Add testing',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 100000,
+                limitParticipants: 8,
+                sport: "647eeec34f723f72eaf5833e"
+            }
+
+            const user = {
+                name: 'christopher',
+                username: 'christopher',
+                email: 'christopher@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account = await request(app)
+                .post('/user')
+                .send(user)
+
+            access_token = account._body.access_token
+
+            const response = await request(app)
+                .post('/event')
+                .send(newEvent)
+                .set('access_token', access_token)
+                .expect(201);
         })
 
         test('Should return Title is required', async () => {
@@ -108,6 +175,15 @@ describe('Event API', () => {
                 .get('/eventList')
 
             expect(response.status).toBe(200)
+        })
+
+        test('Should return error', async () => {
+            jest.spyOn(Event.EventModel, "findAll").mockRejectedValue("Error");
+            // Event.find = jest.fn().mockResolvedValue("Error")
+            const response = await request(app)
+                .get('/eventList')
+
+            expect(response.status).toBe(500)
         })
 
         // test('Should handle error and call next', () => {
@@ -177,7 +253,7 @@ describe('Event API', () => {
     //     // })
 
     //     test('Should return event details', async () => {
-            
+
     //         const mockEvent = new Event({
     //             title: 'Test Event',
     //             location: 'Test Location',
@@ -192,15 +268,659 @@ describe('Event API', () => {
     //         const response = await request(app)
     //           .get(`/event/${mockEvent._id}`)
     //           .expect(200);
-        
+
     //         // Assert the response
     //         expect(response.status).toBe(200);
     //         expect(response.body.title).toBe(mockEvent.title);
     //         expect(response.body.location).toBe(mockEvent.location);
     //         // ... assert other properties as needed
-        
+
     //         // Clean up: delete the mock event from the database
     //         await Event.findByIdAndDelete(mockEvent._id);
     //       });
     // })
+
+    describe('Event Details', () => {
+        test('Should return event by ID', async () => {
+            let access_token;
+            let eventId;
+
+            const user = {
+                name: 'jennifer',
+                username: 'jennifer',
+                email: 'jennifer@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account = await request(app)
+                .post('/user')
+                .send(user)
+
+            access_token = account._body.access_token
+
+            const event = {
+                title: 'Test Event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 100000,
+                limitParticipants: 8,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(event)
+                .set('access_token', access_token)
+
+            eventId = response._body._id
+
+            const eventById = await request(app)
+                .get(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            expect(response.status).toBe(201)
+        })
+
+        // test('Should return error on event by ID', async () => {
+        //     let access_token
+        //     let eventId
+
+        //     const user = {
+        //         name: 'celine',
+        //         username: 'celine',
+        //         email: 'celine@mail.com',
+        //         password: '12345',
+        //         gender: 'female'
+        //     }
+
+        //     const account = await request(app)
+        //         .post('/user')
+        //         .send(user)
+
+        //     access_token = account._body.access_token
+
+        //     const event = {
+        //         title: 'Test Error get by id',
+        //         location: 'Test Location',
+        //         date: '2023-06-07',
+        //         courtPrice: 100000,
+        //         limitParticipants: 8,
+        //     }
+
+        //     const response = await request(app)
+        //         .post('/event')
+        //         .send(event)
+        //         .set('access_token', access_token)
+
+        //         eventId = response._body._id
+
+        //     Event.findById = jest.fn().mockResolvedValue("Error")
+
+        //     const response1 = await request(app)
+        //         .get(`/event/${eventId}`)
+
+        //     expect(response1.status).toBe(500)
+        // })
+
+        test.only('Should return error on event by ID', async () => {
+            jest.spyOn(Event, "findById").mockRejectedValue("Error");
+            const response = await request(app)
+                .get(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+                console.log(response.body, "INI RESPONSE")
+                expect(response.status).toBe(500)
+                expect(response.body.message).toBe('Something happened. Please try again later.')
+        })
+    })
+    describe('Cancel Event', () => {
+        test('Should cancel the event and return a success message', async () => {
+            let creatorId
+            let access_token;
+            let eventId;
+
+            const testingEvent = {
+                title: 'Test Delete Event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const user = {
+                name: 'lmao',
+                username: 'lmao',
+                email: 'lamo@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account = await request(app)
+                .post('/user')
+                .send(user)
+            access_token = account._body.access_token
+
+            // console.log(account, 'INI ACCOUNT')
+            // console.log(access_token, "INI ACCESS TOKEN")
+
+
+            const response = await request(app)
+                .post('/event')
+                .send(testingEvent)
+                .set('access_token', access_token)
+                .expect(201);
+
+            creatorId = response._body.creator
+            eventId = response._body._id
+
+            const deleteEvent = await request(app)
+                .delete(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            // expect(deleteEvent.status).toBe(200)
+        })
+        test('Should return notfound event', async () => {
+            let access_token;
+            let eventId = "647f5fd16634d77d16c68fcb"
+
+            const user = {
+                name: 'lmfao',
+                username: 'lmfao',
+                email: 'lmfao@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account = await request(app)
+                .post('/user')
+                .send(user)
+            access_token = account._body.access_token
+
+            const testingEvent = {
+                title: 'Test Cancel Event Failed',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(testingEvent)
+                .set('access_token', access_token)
+                .expect(201);
+            // eventId = response._body._id
+
+            const failedCancel = await request(app)
+                .delete(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            // console.log(failedCancel.body)
+            expect(failedCancel.status).toBe(404)
+            expect(failedCancel.body.message).toBe("What you're looking for does not exist.")
+        })
+        test('Should return Internal Server Error', async () => {
+            jest.spyOn(Event, "findOneAndRemove").mockRejectedValue("Error");
+            const response = await request(app)
+                .delete(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            console.log(response.body)
+        })
+        test('Should return Unauthorized', async () => {
+            let access_token;
+
+            const user = {
+                name: 'odin',
+                username: 'odin',
+                email: 'odin@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account = await request(app)
+                .post('/user')
+                .send(user)
+            access_token = account._body.access_token
+
+            const failedCancel = await request(app)
+                .delete(`/event/${eventId}`)
+                .set('access_token', access_token)
+
+            // console.log(failedCancel.body)
+            expect(failedCancel.status).toBe(403)
+            expect(failedCancel.body.message).toBe("We're sorry, but you don't have access.")
+        })
+    })
+
+    describe('Join Event', () => {
+        test('should join the event and return the updated event details', async () => {
+            let access_token1;
+            let access_token2;
+            let eventId;
+
+            const user1 = {
+                name: 'eren',
+                username: 'eren',
+                email: 'eren@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const user2 = {
+                name: 'mikasa',
+                username: 'mikasa',
+                email: 'mikasa@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            const mockEvent = {
+                title: 'Test Delete Event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+
+            eventId = response._body._id
+
+
+            const joinEvent = await request(app)
+                .put(`/event/${eventId}`)
+                .set('access_token', access_token2)
+                .expect(200)
+        });
+
+        test('should return error participantCreator', async () => {
+            let access_token1;
+            let access_token2;
+            let eventId;
+
+            const user1 = {
+                name: 'erwin',
+                username: 'erwin',
+                email: 'erwin@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const user2 = {
+                name: 'hange',
+                username: 'hange',
+                email: 'hange@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            const mockEvent = {
+                title: 'Test Delete Event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+
+            eventId = response._body._id
+
+
+            const joinEvent = await request(app)
+                .put(`/event/${eventId}`)
+                .set('access_token', access_token1)
+                .expect(400)
+
+            expect(joinEvent._body.message).toBe("You can't join an event you create.")
+        })
+
+        //ERROR
+        test('should return error notFound', async () => {
+            let access_token1;
+            let access_token2;
+            let eventId = '647f64c07b21b45496acd009'
+
+            const user1 = {
+                name: 'levi',
+                username: 'levi',
+                email: 'levi@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const user2 = {
+                name: 'sasha',
+                username: 'sasha',
+                email: 'sasha@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            // const mockEvent = {
+            //     title: 'Test Delete Event',
+            //     location: 'Test Location',
+            //     date: '2023-06-07',
+            //     courtPrice: 50000,
+            //     limitParticipants: 6,
+            // }
+
+            // const response = await request(app)
+            //     .post('/event')
+            //     .send(mockEvent)
+            //     .set('access_token', access_token1)
+
+            //     eventId = response._body._id
+
+
+            const joinEvent = await request(app)
+                .put(`/event/${eventId}`)
+                .set('access_token', access_token1)
+                .expect(400)
+
+            expect(joinEvent._body.message).toBe("What you're looking for does not exist.")
+        })
+        //ERROR
+        test('should return error eventFull', async () => {
+            let access_token1;
+            let access_token2;
+            let eventId;
+
+            const user1 = {
+                name: 'derrick',
+                username: 'derrick',
+                email: 'derrick@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const user2 = {
+                name: 'patrick',
+                username: 'patrick',
+                email: 'patrick@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            const mockEvent = {
+                title: 'Test Delete Event',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+                totalParticipants: 6
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+
+            eventId = response._body._id
+
+
+            const joinEvent = await request(app)
+                .put(`/event/${eventId}`)
+                .set('access_token', access_token2)
+                .expect(403)
+
+            expect(joinEvent._body.message).toBe("We're sorry, but the event is already full.")
+        })
+    })
+
+    describe('Close Event', () => {
+        test('should close the current event and change status to CLOSE', async () => {
+            let access_token1
+            let eventId;
+            let eventStatus;
+
+            const user1 = {
+                name: 'danke',
+                username: 'danke',
+                email: 'danke@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const mockEvent = {
+                title: 'Close Event Testing',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+
+            eventId = response._body._id
+            eventStatus = response._body.status
+
+            const closeEvent = await request(app)
+                .patch(`/event/${eventId}`)
+                .set("access_token", access_token1)
+
+            expect(closeEvent._body.status).toBe('Close')
+        })
+        //YANG INI GBS GANTI STATUS OPEN JADI CLOSED
+        test('should return error alreadyClose', async () => {
+            let access_token1
+            let eventId;
+            let eventStatus;
+
+            const user1 = {
+                name: 'thx',
+                username: 'thx',
+                email: 'thx@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const mockEvent = {
+                title: 'Close Event Testing',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+                status: 'Close'
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+            eventId = response._body._id
+            eventStatus = response._body.status
+
+            const closeEvent = await request(app)
+                .patch(`/event/${eventId}`)
+                .set("access_token", access_token1)
+            // console.log(closeEvent)
+
+            expect(closeEvent._body.status).toBe('Close')
+        })
+    })
+
+    describe('Leave Event', () => {
+        test('should leave current event', async () => {
+            let access_token1
+            let access_token2
+            let eventId
+            let eventTitle;
+
+            const user1 = {
+                name: 'mama',
+                username: 'mama',
+                email: 'mama@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const user2 = {
+                name: 'papa',
+                username: 'papa',
+                email: 'papa@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            const mockEvent = {
+                title: 'Leave Event Testing',
+                location: 'Test Location',
+                date: '2023-06-07',
+                courtPrice: 50000,
+                limitParticipants: 6,
+            }
+
+            const response = await request(app)
+                .post('/event')
+                .send(mockEvent)
+                .set('access_token', access_token1)
+
+            eventId = response._body._id
+            eventTitle = response._body.title
+
+            const joinEvent = await request(app)
+                .put(`/event/${eventId}`)
+                .set('access_token', access_token2)
+                .expect(200)
+
+            const leaveEvent = await request(app)
+                .put(`/event/${eventId}/leave`)
+                .set('access_token', access_token2)
+
+            expect(leaveEvent._body.message).toBe(`You have successfully leave ${eventTitle}`)
+        })
+
+        test('should return not found error leave event', async () => {
+            let access_token1
+            let access_token2
+            let eventId = '647fce91cee5e16d9ab4a8999'
+            let eventTitle;
+
+            const user1 = {
+                name: 'naruto',
+                username: 'naruto',
+                email: 'naruto@mail.com',
+                password: '12345',
+                gender: 'female'
+            }
+
+            const user2 = {
+                name: 'sasuke',
+                username: 'sasuke',
+                email: 'sasuke@mail.com',
+                password: '12345',
+                gender: 'male'
+            }
+
+            const account1 = await request(app)
+                .post('/user')
+                .send(user1)
+            access_token1 = account1._body.access_token
+
+            const account2 = await request(app)
+                .post('/user')
+                .send(user2)
+            access_token2 = account2._body.access_token
+
+            // const mockEvent = {
+            //     title: 'Leave Event Testing',
+            //     location: 'Test Location',
+            //     date: '2023-06-07',
+            //     courtPrice: 50000,
+            //     limitParticipants: 6,
+            // }
+
+            // const response = await request(app)
+            //     .post('/event')
+            //     .send(mockEvent)
+            //     .set('access_token', access_token1)
+
+            // eventId = response._body._id
+            // eventTitle = response._body.title
+
+            // const joinEvent = await request(app)
+            //     .put(`/event/${eventId}`)
+            //     .set('access_token', access_token2)
+            //     .expect(200)
+
+            const leaveEvent = await request(app)
+                .put(`/event/${eventId}/leave`)
+                .set('access_token', access_token2)
+            expect(leaveEvent.status).toBe(500)
+            expect(leaveEvent._body.message).toBe('Something happened. Please try again later.')
+        })
+    })
+
+    // describe('Start Event')
 })
