@@ -75,10 +75,10 @@ UserSchema.pre("save", async function (next) {
 
   if (!user.isModified("password")) {
     next();
+  } else {
+    const salt = bcrypt.genSaltSync(10);
+    user.password = bcrypt.hashSync(user.password, salt);
   }
-
-  const salt = bcrypt.genSaltSync(10);
-  user.password = bcrypt.hashSync(user.password, salt);
 });
 const User = mongoose.model("User", UserSchema);
 

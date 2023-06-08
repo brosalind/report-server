@@ -44,7 +44,7 @@ class Controller {
   static async userLogin(req, res, next) {
     try {
       const { email, password } = req.body;
-
+      //   console.log(email, password);
       if (!email) {
         throw { name: "noEmail" };
       }
@@ -57,14 +57,15 @@ class Controller {
       if (!findUser) {
         throw { name: "userDoesNotExist" };
       } else {
-        const isPasswordValid = bcrypt.compareSync(
-          req.body.password,
-          findUser.password
-        );
+        console.log(findUser.password, "<<find user");
+        const isPasswordValid = bcrypt.compareSync(password, findUser.password);
 
+        console.log(isPasswordValid);
         if (!isPasswordValid) {
+          //   console.log("disini");
           throw { name: `Invalid Login` };
         } else {
+          console.log("disini loh");
           const access_token = signToken({
             id: findUser._id,
             email: findUser.email,
@@ -80,6 +81,7 @@ class Controller {
             score: findUser.score,
             rating: findUser.rating,
           };
+          console.log("berhasil masuk");
           res.status(200).json({
             user,
             access_token: access_token,
@@ -150,7 +152,7 @@ class Controller {
       const { id } = req.params;
 
       const user = await User.findOne({ _id: id });
-      console.log(id, user, "<<");
+      //   console.log(id, user, "<<");
       if (!user) {
         throw { name: "notFound" };
       }
@@ -163,18 +165,19 @@ class Controller {
 
   static async addUserSports(req, res, next) {
     try {
+      console.log(req.user, "<<<");
       const currentUser = await User.findById(req.user._id);
 
       const { sportList } = req.body;
 
-      console.log(sportList);
+      //   console.log(sportList);
       let result = [];
       await Promise.all(
         sportList.map(async (el) => {
           let sport = await Sport.find({ name: el.name });
-          console.log(sport);
+          //   console.log(sport);
           let obj = {
-            name: sport[0]._id,
+            name: sport[0]?._id,
             // level: el.isPressed,
           };
           result.push(obj);
@@ -184,6 +187,7 @@ class Controller {
       currentUser.sport = result;
 
       await currentUser.save();
+      console.log(currentUser, "<<CUrrent");
 
       const currentUserUpdate = await User.findById(req.user._id).populate(
         "sport.name"
@@ -198,7 +202,7 @@ class Controller {
   static async editUserGenderProf(req, res, next) {
     try {
       let { gender, location } = req.body;
-      let pic = req.file?.path;
+      let pic = req.body?.images;
 
       if (!pic || !pic.trim().length) {
         pic =
@@ -242,7 +246,7 @@ class Controller {
           email: req.body.email,
           gender: req.body.gender,
           sportList: req.body.sportList,
-          pic: req.path?.file,
+          pic: req.body?.images,
         },
       };
 

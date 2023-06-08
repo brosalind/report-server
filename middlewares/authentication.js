@@ -5,6 +5,7 @@ const User = require("../models/User");
 const authentication = async (req, res, next) => {
   try {
     const { access_token } = req.headers;
+    // console.log(access_token, "<<token");
 
     if (!access_token) {
       throw { name: "Unauthorized" };
